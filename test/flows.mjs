@@ -540,6 +540,183 @@ export const flows = [
       assert(TAPS.includes(got), `tap line "${got}"`);
     },
   },
+  {
+    name: 'reduced motion: instant text and screens, no animations',
+    async run(page, url) {
+      await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+      await page.goto(url, { waitUntil: 'load' });
+      await page.waitForSelector('#typed');
+      await page.waitForFunction((g) => document.getElementById('typed').textContent === g, { timeout: 3000 }, GREETING)
+        .catch(() => { throw new Error('greeting was not shown at once'); });
+      // Same tick as the tap: no typing, and the screen switches instantly.
+      const now = await page.evaluate(() => {
+        document.querySelector('button[data-act=go][data-arg=garden]').click();
+        const tabs = [...document.querySelectorAll('section.tab')].filter((t) => !t.hidden);
+        return { text: document.getElementById('typed').textContent, tabs: tabs.length, menu: document.querySelector('.menu').closest('[hidden]') !== null };
+      });
+      assert(now.tabs === 1 && now.menu, 'screen did not switch instantly');
+      assert(now.text.startsWith('Take a breath') && now.text.length > 40, `garden line not instant: "${now.text}"`);
+      await pickSky(page, 'stormy');
+      assert((await page.$eval('#typed', (n) => n.textContent)) === SKY_LINES.stormy, 'sky line not instant');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'moves');
+      await teach(page, 'A'); await teach(page, 'B'); await teach(page, 'C');
+      await page.waitForFunction(() => document.getElementById('scene').classList.contains('heavy'));
+      await tap(page, 'button[data-act=heavyCarry]');
+      assert(await heavy(page), 'no heavy face class');
+      await tap(page, '.move:nth-child(1) button[data-act=use]');
+      assert(await page.$eval('.move.used .mtext', (n) => getComputedStyle(n).textDecorationLine.includes('line-through')), 'crossed-out move missing');
+      await tap(page, '.move:nth-child(2) button[data-act=save]');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'recharge');
+      const before = await caption(page);
+      await careTap(page, 'food');
+      const after = await caption(page);
+      assert(after !== before && STAGES.some((s) => s[0] === after), `plant caption did not move: "${before}" -> "${after}"`);
+      await page.waitForFunction(() => document.getAnimations().length === 0, { timeout: 3000 })
+        .catch(async () => { throw new Error('animations running: ' + await page.evaluate(() => document.getAnimations().length)); });
+    },
+  },
+  {
+    name: 'no numbers outside the usual-moves stepper and N/B lines',
+    async run(page, url) {
+      await boot(page, url);
+      const seen = [];
+      // Visible text minus the stepper, the moves hint and dialogs; dialog lines are checked apart, and may hold N or B on the moves intro and stepper.
+      const scan = async (label, dialogMayNameN) => {
+        const t = await page.evaluate(() => {
+          const out = [];
+          const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          for (let n = w.nextNode(); n; n = w.nextNode()) {
+            const p = n.parentElement;
+            if (!p || !p.checkVisibility() || p.closest('script,style,.sr,svg,.baseline,#say,#msay')) continue;
+            if (p.closest('section.tab:nth-of-type(3) > .hint')) continue;
+            out.push(n.textContent);
+          }
+          const d = [document.getElementById('typed'), document.getElementById('msay')].filter((x) => x && x.checkVisibility()).map((x) => x.textContent);
+          return { page: out.join(' '), dialog: d.join(' | ') };
+        });
+        if (/\d/.test(t.page)) seen.push(`${label}: page "${(t.page.match(/.{0,20}\d.{0,20}/) || [''])[0]}"`);
+        if (!dialogMayNameN && /\d/.test(t.dialog)) seen.push(`${label}: dialog "${t.dialog.slice(0, 60)}"`);
+      };
+      await scan('home');
+      await goto(page, 'garden'); await dialog(page); await scan('garden');
+      await pickSky(page, 'cloudy'); await dialog(page); await scan('sky');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'recharge'); await dialog(page); await scan('recharge');
+      for (const k of ['food', 'water', 'rest', 'pit', 'outside']) { await careTap(page, k); await dialog(page); await scan('care ' + k); }
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'moves'); await dialog(page); await scan('moves', true);
+      for (const m of ['Walk', 'Call', 'Nap']) { await teach(page, m); await dialog(page); await scan('teach ' + m); }
+      await tap(page, '.move:nth-child(1) button[data-act=use]'); await dialog(page); await scan('used');
+      await tap(page, '.move:nth-child(2) button[data-act=save]'); await dialog(page); await scan('saved');
+      await tap(page, 'button[data-act=usual][data-arg="1"]'); await dialog(page); await scan('stepper', true);
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'thoughts'); await dialog(page); await scan('thoughts');
+      await page.$eval('#thought', (n) => { n.value = 'I should rest more'; });
+      await tap(page, 'button[data-act=kind][data-arg="0"]');
+      await page.waitForFunction(() => !document.querySelector('.modal').hidden);
+      await scan('thought popup');
+      await tap(page, '.modal .opts button:nth-child(1)'); await dialog(page); await scan('thought reply');
+      await tap(page, 'button[data-act=home]'); await scan('home after');
+      assert(!seen.length, 'digits: ' + seen.join('; '));
+    },
+  },
+  {
+    name: 'safe area and 320px width',
+    async run(page, url) {
+      await page.setViewport({ width: 320, height: 800 });
+      await boot(page, url);
+      const css = await page.$$eval('style', (s) => s.map((x) => x.textContent).join('\n'));
+      const m = css.match(/body\s*\{[^}]*padding:[^;}]*[;}]/);
+      assert(m && ['top', 'right', 'bottom', 'left'].every((e) => m[0].includes(`env(safe-area-inset-${e}`)), 'body padding lacks env(safe-area-inset-*)');
+      assert(/\.modal\s*\{[^}]*env\(safe-area-inset-bottom/.test(css), 'pop-up lacks safe-area padding');
+      const fits = async (label) => {
+        const r = await page.evaluate(() => {
+          const m = document.querySelector('.modal');
+          return { sw: document.documentElement.scrollWidth, bw: document.body.scrollWidth, iw: innerWidth, mw: m.hidden ? 0 : m.scrollWidth, mc: m.hidden ? 0 : m.clientWidth };
+        });
+        assert(r.sw <= r.iw && r.bw <= r.iw, `${label}: scrollWidth ${r.sw}/${r.bw} > ${r.iw}`);
+        assert(r.mw <= r.mc, `${label}: pop-up scrolls sideways ${r.mw} > ${r.mc}`);
+      };
+      await fits('home');
+      for (const s of SCREENS) { await goto(page, s); await fits(s); await tap(page, 'button[data-act=home]'); }
+      await goto(page, 'moves'); await stepTo(page, 1); await pickSky(page, 'sunny');
+      await teach(page, 'One'); await teach(page, 'Two');
+      await page.waitForFunction(() => !document.querySelector('.modal').hidden);
+      await fits('teach past N');
+      await tap(page, 'button[data-act=heavySave]');
+      assert((await page.$eval('#msay', (n) => n.textContent)) === 'Which one can wait?', 'which pop-up missing');
+      await fits('which one can wait');
+      await tap(page, '.modal button[data-act=wait]');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'thoughts');
+      await tap(page, 'button[data-act=kind][data-arg="1"]');
+      await page.waitForFunction(() => !document.querySelector('.modal').hidden);
+      await fits('thought kind');
+    },
+  },
+  {
+    name: 'forecast question only on the Garden',
+    async run(page, url) {
+      await boot(page, url);
+      const count = () => page.evaluate((q) => [...document.querySelectorAll('body *')]
+        .filter((n) => n.checkVisibility() && n.children.length === 0 && n.textContent.includes(q)).length, 'What’s your forecast?');
+      assert((await count()) === 0, 'forecast shown on Home');
+      for (const s of SCREENS) {
+        await goto(page, s);
+        const c = await count();
+        assert(c === (s === 'garden' ? 1 : 0), `${s}: forecast count ${c}`);
+        await tap(page, 'button[data-act=home]');
+      }
+      await goto(page, 'thoughts');
+      await tap(page, 'button[data-act=kind][data-arg="0"]');
+      assert((await count()) === 0, 'forecast shown in a pop-up');
+    },
+  },
+  {
+    name: 'reset prototype returns to first visit, keeps Future moves',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'garden'); await pickSky(page, 'drizzly');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'recharge');
+      for (const k of ['food', 'water', 'rest', 'pit', 'outside']) await careTap(page, k);
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'moves');
+      await stepTo(page, 2);
+      await teach(page, 'Keep me'); await teach(page, 'Other'); await teach(page, 'Third');
+      await tap(page, 'button[data-act=heavyCarry]');
+      await tap(page, '.move:nth-child(1) button[data-act=save]');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'thoughts'); await tap(page, 'button[data-act=kind][data-arg="2"]');
+      await tap(page, '.modal .opts button:nth-child(1)');
+      assert((await bondIdx(page)) > 0, 'play-through did not raise friendship');
+      await tap(page, 'button[data-act=home]');
+      await tap(page, 'button[data-act=reset]');
+      assert((await dialog(page)) === GREETING, 'greeting after reset');
+      assert(await visible(page, '.menu'), 'not on Home after reset');
+      assert((await bondIdx(page)) === 0, 'friendship not reset');
+      assert(!(await visible(page, '.modal')), 'pop-up open after reset');
+      const st = await page.evaluate(() => ({
+        sky: document.getElementById('scene').getAttribute('class'),
+        pressed: [...document.querySelectorAll('button[data-act=sky]')].filter((b) => b.getAttribute('aria-pressed') === 'true').length,
+        bundles: document.querySelectorAll('#pack .bundle').length,
+        cared: document.querySelectorAll('.cbtn.together').length,
+        moves: state.moves.length, heavy: document.getElementById('scene').classList.contains('heavy'),
+      }));
+      assert(st.sky.startsWith('w-none') && !st.heavy && st.pressed === 0, 'sky still selected: ' + JSON.stringify(st));
+      assert(st.bundles === 0 && st.moves === 0, 'backpack not empty: ' + JSON.stringify(st));
+      assert(st.cared === 0, 'recharge cards still ticked');
+      await goto(page, 'garden');
+      assert((await caption(page)) === STAGES[0][0], 'not a seed after reset');
+      await tap(page, 'button[data-act=home]');
+      await goto(page, 'moves');
+      assert((await sel(page, '.moves .move')).every((t) => t === '—'), 'grid not empty');
+      const fut = (await sel(page, '.daycare li span:first-child')).join();
+      assert(fut === 'Keep me', 'Future moves lost: ' + fut);
+    },
+  },
 ];
 
 const failures = [];
