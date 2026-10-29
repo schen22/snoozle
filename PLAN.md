@@ -31,6 +31,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - Keep state and memory between visits without a code: options are a date-keyed `localStorage` mirror (~10 lines,
   one device), then user sessions with server storage (Cloudflare Worker + D1 or KV, a login, a privacy note for
   stored thoughts). Not needed now (Sarah, 2026-10-29); Export/load covers it.
+  When friendship persists across days, recut `BOND_AT` again: today's `[0, 2, 4, 6, 8, 10]` is sized for one
+  day (at most 14), so it would fill in a day or two (Sarah, 2026-10-29).
 
 - Accessibility pass from the spec: screen-reader labels, focus ring and focus moves, WCAG AA contrast in both themes.
   From the v1 batch review: the pop-ups need focus moved in, `inert` on the app and Escape; the tap-Snoozle and
@@ -148,3 +150,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — **Load-time targets** ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)): LCP ≤ 2.0 s (warn 1.3), FCP ≤ 1.5 s,
   first tap ≤ 2.5 s, CLS ≤ 0.1 (warn 0.05), our requests ≤ 20, median of 5 runs. The split costs ~0.4 s in the lab
   (1.41 s); Early Hints and a short cache were tried and dropped; static first-paint copy (option B) gave no gain.
+- 2026-10-29 — **Friendship lines fit one day**: `BOND_AT` `[0, 2, 6, 12, 20, 35]` → `[0, 2, 4, 6, 8, 10]`. Friendship
+  resets daily and a day reaches at most 14, so the lines at 20 and 35 never showed (contradicting the 2026-10-28
+  entry). Revisit with cross-day persistence ([Later](#later)).
+- 2026-10-29 — **Content and CBT review applied** (Sarah): Thoughts buttons ≤ five words (now gated), two reframes
+  ask instead of assert, Moves `introOk`/`used`/`saved`, bond lines three and four, friend reply. Kept: Snorlax/Ditto
+  cloud joke, four-sentence `greeting` and `garden.intro`, no support pointer, moves cap still counts used moves.
