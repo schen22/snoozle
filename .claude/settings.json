@@ -1,0 +1,5 @@
+{
+  "sandbox": {
+    "excludedCommands": ["node test/flows.mjs", "npm run gate", "npm run perf", "node scripts/perf.mjs"]
+  }
+}
