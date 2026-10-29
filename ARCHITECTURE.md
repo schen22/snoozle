@@ -13,9 +13,9 @@ Status: **draft for Sarah's review** (2026-10-28). Product spec: [Snoozle's Gard
 - Load budget: **≤ 20 KB brotli HTML, ≤ 70 KB total transfer, LCP ≤ 2.0 s on Slow 4G**. Measured: the prototype is
   13 KB brotli; fonts add 44 KB ([§5](#5-load-time)).
 - Deviations from the spec (Sarah, 2026-10-28/29): no renaming; accessibility deferred; menu morph cut.
-- **Export and load** replace stored state: a "Garden Code" in a text the person keeps (notes app, message to self),
-  pasted back to restore friendship, thoughts, Future moves and today. Reuses the dragons game's Dispatch Code
-  ([§3](#export-and-load)). Accounts and server state are Later.
+- **v2: Export and load** instead of stored state: a "Garden Code" in a text the person keeps, pasted back to
+  restore friendship, thoughts, Future moves and today, plus a read-only thoughts-and-friendship export. Reuses the
+  dragons game's Dispatch Code ([§3](#export-and-load)). Not in v1. Accounts and server state come after that.
 - Animations: cut the menu morph (~30 lines, ~0.7 s wait on every menu tap) for an instant swap; keep the ones that
   carry meaning ([§6](#6-animation-audit)).
 - Build in 4 milestones, each closed by `npm run gate` ([§8](#8-milestones)).
@@ -133,6 +133,9 @@ act(type, arg):
 
 ### Export and load
 
+**v2, not in v1** (Sarah, 2026-10-29). Designed now so v1's state shape doesn't block it: v1 keeps `bond` as a set
+and moves with ids, which is all v2 needs to add `thoughts` and serialise.
+
 The person owns their history; the page keeps none of it. Pattern and code reused from the dragons game's
 Dispatch Code (`doodles/dragons/public/engine.js`, `toCode` / `fromCode` / `migrate`, ~20 lines).
 
@@ -143,7 +146,7 @@ Dispatch Code (`doodles/dragons/public/engine.js`, `toCode` / `fromCode` / `migr
 | Lasting | `bond` (friendship acts, kept across days as a running set of `date:act`), `usual`, `futureMoves`, `thoughts` | Always |
 | Today | `date`, `sky`, `care`, `cared`, `moves` | Only when the code's `date` is today |
 
-`thoughts` is a new fact: `{date, time, kind, choice, text?}` per thought named (text only when typed, ≤ 200 chars).
+`thoughts` is a new v2 fact (v1 keeps no thoughts, as the spec says): `{date, time, kind, choice, text?}` per thought named (text only when typed, ≤ 200 chars).
 The spec's v1 rule "typed thoughts are not kept" changes to "kept in memory for the day and in exports only".
 The log keeps the newest 100 thoughts. Size: a thought is ~120 bytes of JSON typically, ~280 with 200 typed chars,
 so the log is ~12–28 KB, and base64 adds a third: a code is ~16 KB typically, ~37 KB at most. Notes apps and the
@@ -169,7 +172,9 @@ badges or achievements).
 | "Export" link | Home, beside Reset prototype | Opens a bottom sheet: pick **Today** or **Thoughts and friendship**, then **Share** (`navigator.share`, phones) · **Copy** (clipboard) · **Download** (`.md` file, desktop fallback) |
 | "Load" link | Same row | Bottom sheet with a paste box + **Load**. Confirms in Snoozle's voice what came back |
 
-- Friendship across days: with a loaded code, `bond` keeps earlier days' acts, so the higher lines ("every kind of
+- In v1, friendship resets daily, so a day reaches at most 1 + 8 + thoughts acts and the 20 and 35 lines are
+  rare or out of reach. That's accepted until v2.
+- Friendship across days (v2): with a loaded code, `bond` keeps earlier days' acts, so the higher lines ("every kind of
   weather together") become reachable honestly, over many days and only for someone who keeps their code.
 - Privacy: the code is base64, not encrypted. Anyone holding it can read the thoughts in it. No server ever sees it.
   The Export sheet says so in one line ([Q11](#10-open-questions)).
@@ -255,7 +260,7 @@ prototype.
 
 | Animation | Cost | Value | Verdict |
 |---|---|---|---|
-| **Menu morph**: ▸ blinks twice → 320 ms wait → others fade (200 ms) → a ghost chip flies to the Back row (360 ms, Web Animations + `getBoundingClientRect`) → content fades up (300 ms) | ~30 lines JS + CSS; **~0.7–1.0 s before the screen is usable, on every menu tap**; a second tap within 320 ms spawns a second ghost; separate reduced-motion branch; gate flows must wait it out | Low: decoration on navigation, and the hop + typed line already answer the tap | **Cut ★.** Instant swap: menu hides, Back row + label chip show, content fades up in 150 ms (CSS only) |
+| **Menu morph**: ▸ blinks twice → 320 ms wait → others fade (200 ms) → a ghost chip flies to the Back row (360 ms, Web Animations + `getBoundingClientRect`) → content fades up (300 ms) | ~30 lines JS + CSS; **~0.7–1.0 s before the screen is usable, on every menu tap**; a second tap within 320 ms spawns a second ghost; separate reduced-motion branch; gate flows must wait it out | Low: decoration on navigation, and the hop + typed line already answer the tap | **Cut** (decided 2026-10-29). Instant swap: menu hides, Back row + label chip show, content fades up in 150 ms (CSS only) |
 | ▸ cursor blinking twice | 1 keyframe, but only worth it with the wait above | Low | **Cut**: a static ▸ on the chip is enough |
 | Dialog typer (18 ms/char, tap to skip) | ~20 lines; a 120-char line takes ~2.2 s | High: the retro dialog voice | Keep; a new line cancels the old one |
 | Sky motions (bounce, sway, droop, breathing) | 4 CSS keyframes | High: the check-in's whole reply | Keep |
@@ -325,14 +330,14 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | M2 Care | Garden (skies, rain, leaf shelter, plant stages) and Recharge Center; friendship line | Their acceptance criteria pass in `gate` |
 | M3 Moves | Move tutor, backpack and strain, pop-ups, Future moves + storage | Teach past N never blocks; Future moves survive reload |
 | M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; thoughts log; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
-| M5 Export and load | Garden Code, both Markdown exports (Today; Thoughts and friendship), Share / Copy / Download, Load sheet, migrate | Export → wipe → load restores lasting facts exactly (and today's if same date); a truncated or edited code changes nothing; gate covers both |
+| v2 Export and load | Garden Code, both Markdown exports (Today; Thoughts and friendship), Share / Copy / Download, Load sheet, migrate | Export → wipe → load restores lasting facts exactly (and today's if same date); a truncated or edited code changes nothing; gate covers both |
 
 ## 9. Trade-offs taken
 
 | Chose | Over | Because | Cost |
 |---|---|---|---|
 | Store Future moves only | Store the whole day | Least data on the device; matches "missing a day costs nothing" | A refresh wipes today |
-| Export/load code ([§3](#export-and-load)) | Accounts, server sync | Person owns their data; $0; no auth, no privacy policy for stored thoughts | They must keep the code; no automatic sync across devices |
+| Export/load code, v2 ([§3](#export-and-load)) | Accounts, server sync | Person owns their data; $0; no auth, no privacy policy for stored thoughts | They must keep the code; no automatic sync across devices |
 | No renaming | Rename + store the name | One less screen, no stored identity | Spec copy for renaming dropped |
 | Defer accessibility | Spec's full section now | Sarah's call, 2026-10-28: ship the experience first | Screen readers and keyboard users underserved until Later; `aria-live`, real `<button>`s and reduced motion kept because they cost nothing |
 | Instant screen swap | Spec's menu morph | ~0.7 s faster per tap, no JS layout code, no double-tap race | Less "handheld menu" charm |
@@ -353,4 +358,4 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | 8 | ✅ Public page, private repo, no Access (2026-10-29) | — | — |
 | 9 | ✅ Friendship from distinct acts only; keep all 6 lines (2026-10-29) | — | — |
 | 10 | ✅ Soften strain: short tremble, then a slow sag (2026-10-29) | — | — |
-| 11 | Copy for the Export and Load sheets, incl. the privacy line and the code's name ("Garden Code"): Claude drafts in Snoozle's voice, Sarah approves (agreed 2026-10-29) | — | M5 |
+| 11 | Copy for the Export and Load sheets, incl. the privacy line and the code's name ("Garden Code"): Claude drafts in Snoozle's voice, Sarah approves (agreed 2026-10-29) | — | v2 |

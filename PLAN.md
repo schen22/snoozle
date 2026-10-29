@@ -15,10 +15,13 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
       build command none, output directory `/`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph).
-- [ ] M5 Export and load — Garden Code + two Markdown exports (Today; Thoughts and friendship), Share / Copy / Download, Load
-      ([ARCHITECTURE §3](ARCHITECTURE.md#export-and-load)). Priority over any stored state.
 
 ## Later
+
+- **v2: Export and load** ([ARCHITECTURE: Export and load](ARCHITECTURE.md#export-and-load)), first after v1 ships:
+  - Today export: Markdown moments + `SNZ1.` Garden Code; Load restores it.
+  - Thoughts and friendship export: every logged thought by date + friendship line, read-only, no code.
+  - Thought log (v2 fact), Share / Copy / Download, copy drafted by Claude for Sarah ([Q11](ARCHITECTURE.md#10-open-questions)).
 
 - Keep state and memory between visits without a code: options are a date-keyed `localStorage` mirror (~10 lines,
   one device), then user sessions with server storage (Cloudflare Worker + D1 or KV, a login, a privacy note for
@@ -68,3 +71,5 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   export copy, Sarah approves).
 - 2026-10-29 — **Second export, "Thoughts and friendship"**: every logged thought by date plus the friendship line
   reached, read-only with no code, so it can be shared safely. Thought log cap raised 60 → 100 (code ≤ ~37 KB).
+- 2026-10-29 — **Export and load moved to v2** (both exports and Load): not needed for v1. v1 = M1–M4; v1 keeps
+  no thought log, and friendship resets daily.
