@@ -41,19 +41,16 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 ## Working rules
 
-- Always hold a You Aren't Gonna Need It mentality. Do not overengineer. Never expand scope without permission.
-- Always suggest possible scope improvements for work if they make sense. All work must be justifiable.
-- Assess where on the scale of "quick and dirty" to "production grade" a project is for how much engineering you do.
-  Snoozle today: a personal v1 on a public URL with no user data on the server. That puts it nearer quick than
-  production: gates and the architecture rules, but no extra abstraction, config or tests beyond the spec's
-  acceptance criteria.
-- Always spin up a sub agent with minimal context using a cheap model, with the job of reviewing your changes, to
-  sus out possible problems with fresh eyes. Brief it with the diff and the rules it touches only (no history),
-  `model: "haiku"`, read-only, blockers only, ≤ 10 lines. This applies to every change, and it overrides the
-  `delegate` skill's "separate reviewer only for risky tasks".
+YAGNI and the one-pass Haiku review are global (`~/.claude/CLAUDE.md` § How we work, `review-gates` Gate 1).
+Where Snoozle sits on that scale: a personal v1 on a public URL with no user data on the server, so nearer
+quick than production. It gets gates and the architecture rules, but no extra abstraction, config or tests
+beyond the spec's acceptance criteria.
 
 ## Lessons
 
 <!-- Dated, append-only. Sort with the ladder at end of session. -->
 - 2026-10-28 · Measure the load budget before setting it: Nunito is one variable `woff2` (39 KB) for all three
   weights, so dropping weights saves nothing.
+- 2026-10-29 · Lane M1 hit 158k tokens in 16 tool calls before writing any gate. Its brief had two big items
+  (restructure the 789-line prototype + five gate scripts), and each rewrite of the whole file rode along on
+  every later step. One item per helper here, and gate scripts in their own lane.
