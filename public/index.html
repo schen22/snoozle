@@ -636,7 +636,7 @@ function build() {
   ui.up = btn('usual', 1, 'step', '+'); ui.up.setAttribute('aria-label', M.more);
   const input = el('input', {id: 'newmove', placeholder: M.placeholder, maxlength: 40, 'aria-label': M.inputLabel});
   input.addEventListener('focus', () => input.scrollIntoView({block: 'center'}));
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') ui.teach.click(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) ui.teach.click(); });
   ui.teach = btn('teach', null, 'pbtn', M.teach);
   // Thoughts
   const T = COPY.thoughts;
