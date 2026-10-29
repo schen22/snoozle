@@ -2,7 +2,7 @@
 // Token check: #hex colours only in public/css/tokens.css (none in index.html, app.css, motion.css, public/js/**);
 // no digits in COPY strings (in public/js/copy.js)
 // (placeholders excepted); Recharge cards fit their card (title ≤ 14, small line ≤ 20, replies ≤ 2 sentences);
-// choice buttons are five words at most.
+// choice buttons are five words at most; every friendship line is reachable in one day.
 // Prints problems (capped) and a summary; exit 1 on any.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -44,6 +44,11 @@ const T = COPY.thoughts, M = COPY.moves;
 for (const b of [...T.kinds.flatMap((k) => [k.t, ...k.opts.map((o) => o.label)]), T.wander.label, M.heavySave, M.heavyCarry]) {
   if (b.trim().split(/\s+/).length > 5) problems.push(`choice button over 5 words: ${b}`);
 }
+// 5. Friendship resets daily, so the top BOND_AT step must fit one day: sky + each card + each thought kind.
+const bondAt = JSON.parse(readFileSync(join(root, 'public/js/state.js'), 'utf8').match(/const BOND_AT = (\[[^\]]*\])/)?.[1] ?? '[]');
+const dayMax = 1 + COPY.recharge.cards.length + T.kinds.length;
+if (bondAt.length !== COPY.bond.length) problems.push(`BOND_AT has ${bondAt.length} steps, COPY.bond has ${COPY.bond.length} lines`);
+if (Math.max(...bondAt) > dayMax) problems.push(`friendship line at ${Math.max(...bondAt)} unreachable: a day reaches at most ${dayMax}`);
 console.log(`tokens: ${problems.length} problem(s); ${strings} COPY strings scanned`);
 for (const p of problems.slice(0, 5)) console.log(`  ${p}`);
 process.exit(problems.length ? 1 : 0);
