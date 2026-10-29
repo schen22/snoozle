@@ -138,3 +138,6 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   hint drops "sunnier", "70%" becomes "mostly done" (digit exception removed), and the Thoughts opening becomes
   "Let’s name it together." and "Used it" line 1 becomes "…My leaves did a little wiggle." (both reverse earlier
   decisions). "Recharge Center" pun kept.
+- 2026-10-29 — **Recharge: eight cards become six** (Sarah, option B). Food takes water ("Eat or drink"), move
+  takes outside ("Stretch or step out"); Bathroom stays. Card limits: title ≤ 14 characters, small line ≤ 20,
+  replies ≤ 2 sentences. `BOND_AT` unchanged; a day now reaches at most 14 friendship (was 16).
