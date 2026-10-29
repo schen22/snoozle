@@ -39,8 +39,7 @@
   "Almost there. No rush.",
   "Look what today grew."
  ],
- "recharge.hint": "Snoozle gets hungry, thirsty and sleepy too. Whatever you do, Snoozle recharges with you.",
- "recharge.intro": "Pick anything, big or small. It all counts.",
+ "recharge.intro": "Pick anything, big or small. It all counts, and I’ll recharge right along with you.",
  "recharge.grew": "Look, our plant grew!",
  "recharge.card0": [
   "Share food",
@@ -108,7 +107,7 @@
  ],
  "moves.hintBelow": [
   "today, so",
-  "feels right instead of your usual"
+  "feels right."
  ],
  "moves.hintOk": [
   "feels right today."
@@ -122,23 +121,13 @@
   "Got it. On a sunny day, we’ll aim for",
   "."
  ],
- "moves.introNone": [
-  "I can comfortably carry",
-  "moves today. Share your forecast in the Garden and I’ll know how many feel right."
- ],
+ "moves.introNone": "Share your forecast in the Garden and I’ll know how many moves feel right.",
  "moves.introOver": [
-  "It’s",
-  "today, so",
-  "moves feels like plenty. Want to save one for the future?"
+  "That’s plenty for a",
+  "day. Want to save one for the future?"
  ],
- "moves.introLow": [
-  "weather. Let’s keep it to",
-  "moves today. Smaller is braver than it looks."
- ],
- "moves.introOk": [
-  "Clear enough for",
-  "moves. Pick the ones that matter most."
- ],
+ "moves.introLow": "weather. Let’s keep it light today. Smaller is braver than it looks.",
+ "moves.introOk": "Clear enough for a full pack. Pick the ones that matter most.",
  "moves.dash": "—",
  "moves.buttons": [
   "Used it",
@@ -150,7 +139,7 @@
   "I learned",
   "!"
  ],
- "moves.heavy": "My backpack’s getting heavy, though. We usually carry about four. Want to try that?",
+ "moves.heavy": "My backpack’s getting heavy, though. Want to try fewer today?",
  "moves.heavyOpts": [
   "Sure, save one for later",
   "I’ll carry it today"
@@ -182,7 +171,6 @@
   ". Letting go is a move too."
  ],
  "moves.futureEmpty": "Nothing saved yet. That’s a nice, light feeling.",
- "thoughts.hint": "Each thought has its own way through.",
  "thoughts.intro": "Rustle, rustle… a wild thought appeared! Help us catalog and name it.",
  "thoughts.label": [
   "What’s the thought?",

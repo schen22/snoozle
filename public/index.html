@@ -305,8 +305,7 @@ const COPY = {
       ['A bud is forming.', 'Almost there. No rush.'],
       ['In full bloom.', 'Look what today grew.']]},
   recharge: {
-    hint: 'Snoozle gets hungry, thirsty and sleepy too. Whatever you do, Snoozle recharges with you.',
-    intro: 'Pick anything, big or small. It all counts.',
+    intro: 'Pick anything, big or small. It all counts, and I’ll recharge right along with you.',
     grew: ' Look, our plant grew!',
     cards: [
       {k: 'food', e: '🍙', t: 'Share food', s: 'Have you eaten?', r: ['We’re munching side by side. Best picnic ever.', 'Crunch crunch. Thanks for feeding us both.']},
@@ -318,16 +317,16 @@ const COPY = {
       {k: 'art', e: '🎨', t: 'Make something', s: 'Messy counts', r: ['Ooh, can I add a leaf to it?', 'Making just for fun. No grades around here.']},
       {k: 'move', e: '🤸', t: 'Wiggle around', s: 'Stretch, dance, walk', r: ['Wiggle wiggle! My roots feel looser.', 'That felt good. Want to do a little more, or rest?']}]},
   moves: {
-    hintBelow: (e, sky, n, b) => `${e} ${sky} today, so ${n} feels right instead of your usual ${b}.`,
+    hintBelow: (e, sky, n) => `${e} ${sky} today, so ${n} feels right.`,
     hintOk: n => `${n} feels right today.`,
     usual: 'Your usual on a sunny day:',
     fewer: 'Fewer moves',
     more: 'More moves',
     usualSet: b => `Got it. On a sunny day, we’ll aim for ${b}.`,
-    introNone: n => `I can comfortably carry ${n} moves today. Share your forecast in the Garden and I’ll know how many feel right.`,
-    introOver: (sky, n) => `It’s ${sky} today, so ${n} moves feels like plenty. Want to save one for the future?`,
-    introLow: (sky, n) => `${sky} weather. Let’s keep it to ${n} moves today. Smaller is braver than it looks.`,
-    introOk: n => `Clear enough for ${n} moves. Pick the ones that matter most.`,
+    introNone: 'Share your forecast in the Garden and I’ll know how many moves feel right.',
+    introOver: sky => `That’s plenty for a ${sky} day. Want to save one for the future?`,
+    introLow: sky => `${sky} weather. Let’s keep it light today. Smaller is braver than it looks.`,
+    introOk: 'Clear enough for a full pack. Pick the ones that matter most.',
     dash: '—',
     useIt: 'Used it',
     saveIt: 'Save for later',
@@ -336,7 +335,7 @@ const COPY = {
     teach: 'Teach',
     learned: m => `I learned ${m}!`,
     welcome: m => `Welcome back, ${m}!`,
-    heavy: m => `I learned ${m}! My backpack’s getting heavy, though. We usually carry about four. Want to try that?`,
+    heavy: m => `I learned ${m}! My backpack’s getting heavy, though. Want to try fewer today?`,
     heavySave: 'Sure, save one for later',
     heavyCarry: 'I’ll carry it today',
     carry: 'Okay, I’ve got it! Let me know if it gets too heavy.',
@@ -351,7 +350,6 @@ const COPY = {
     bye: m => `Bye, ${m}. Letting go is a move too.`,
     futureEmpty: 'Nothing saved yet. That’s a nice, light feeling.'},
   thoughts: {
-    hint: 'Each thought has its own way through.',
     intro: 'Rustle, rustle… a wild thought appeared! Help us catalog and name it.',
     label: 'What’s the thought?',
     optional: ' (optional)',
@@ -499,10 +497,10 @@ function act(type, arg) {
 }
 function movesIntro(d) {
   const m = COPY.moves, S = d.sky && COPY.skies[d.sky];
-  if (!d.sky) return m.introNone(d.N);
-  if (d.heavy) return m.introOver(S.label.toLowerCase(), d.N);
-  if (d.N < d.usual) return m.introLow(S.label, d.N);
-  return m.introOk(d.N);
+  if (!d.sky) return m.introNone;
+  if (d.heavy) return m.introOver(S.label.toLowerCase());
+  if (d.N < d.usual) return m.introLow(S.label);
+  return m.introOk;
 }
 function lineFor(type, arg, b, a, c) {
   switch (type) {
@@ -635,6 +633,7 @@ function build() {
   // Moves
   const M = COPY.moves;
   ui.moveHint = el('p', {class: 'hint'}); ui.usual = el('b'); ui.grid = el('div', {class: 'moves'}); ui.future = el('ul', {class: 'daycare'});
+  ui.futureHint = el('p', {class: 'hint'}, M.futureHint);
   ui.down = btn('usual', -1, 'step', '−'); ui.down.setAttribute('aria-label', M.fewer);
   ui.up = btn('usual', 1, 'step', '+'); ui.up.setAttribute('aria-label', M.more);
   const input = el('input', {id: 'newmove', placeholder: M.placeholder, maxlength: 40, 'aria-label': M.inputLabel});
@@ -648,11 +647,11 @@ function build() {
   const tab = (id, ...kids) => (ui[id] = el('section', {class: 'tab'}, ...kids));
   app.append(ui.bond, dialog, ui.home,
     tab('garden-tab', weather, el('h2', {}, G.card), ui.garden),
-    tab('recharge-tab', el('p', {class: 'hint'}, COPY.recharge.hint), camp),
+    tab('recharge-tab', camp),
     tab('moves-tab', ui.moveHint, el('div', {class: 'teach'}, input, ui.teach), ui.grid,
       el('div', {class: 'baseline'}, M.usual, ui.down, ui.usual, ui.up),
-      el('h2', {}, M.future), el('p', {class: 'hint'}, M.futureHint), ui.future),
-    tab('thoughts-tab', el('p', {class: 'hint'}, T.hint),
+      el('h2', {}, M.future), ui.futureHint, ui.future),
+    tab('thoughts-tab',
       el('div', {class: 'grass-box'}, el('div', {class: 'grass-anim', 'aria-hidden': 'true'}, '🌾🌾🌾'),
         el('label', {for: 'thought'}, T.label, el('span', {}, T.optional)),
         el('textarea', {id: 'thought', placeholder: T.placeholder}),
@@ -684,7 +683,7 @@ function renderScene(d) {
 }
 function renderMoves(d) {
   const M = COPY.moves, S = d.sky && COPY.skies[d.sky];
-  ui.moveHint.textContent = S && d.N < d.usual ? M.hintBelow(S.e, S.label, d.N, d.usual) : M.hintOk(d.N);
+  ui.moveHint.textContent = S && d.N < d.usual ? M.hintBelow(S.e, S.label, d.N) : M.hintOk(d.N);
   ui.usual.textContent = d.usual;
   ui.down.disabled = d.usual <= 1; ui.up.disabled = d.usual >= 10;
   const cells = [];
@@ -697,6 +696,7 @@ function renderMoves(d) {
       m.used ? null : el('span', {class: 'mrow'}, btn('use', m.id, 'mini', M.useIt), btn('save', m.id, 'mini', M.saveIt))));
   }
   ui.grid.replaceChildren(...cells);
+  ui.futureHint.hidden = !state.futureMoves.length;
   ui.future.replaceChildren(...(state.futureMoves.length ? state.futureMoves.map((t, i) =>
     el('li', {}, el('span', {}, t), el('span', {class: 'mrow'}, btn('bring', i, 'mini', M.bring), btn('letgo', i, 'mini', M.letGo))))
     : [el('li', {class: 'note'}, M.futureEmpty)]));

@@ -219,7 +219,7 @@ export const flows = [
     async run(page, url) {
       await boot(page, url);
       await goto(page, 'recharge');
-      assert((await dialog(page)) === 'Pick anything, big or small. It all counts.', 'recharge intro wrong');
+      assert((await dialog(page)) === 'Pick anything, big or small. It all counts, and I’ll recharge right along with you.', 'recharge intro wrong');
       const keys = ['food', 'water', 'rest', 'pit', 'outside'];
       let grew = 0, stage = 0;
       const WANT = [1, 1, 2, 2, 3]; // stage after each of the 5 taps (water 1..5)
@@ -318,9 +318,9 @@ export const flows = [
       assert((await hint()) === '4 feels right today.', 'plain hint');
       assert((await usualN(page)) === '4', 'default usual');
       await pickSky(page, 'drizzly');
-      assert((await hint()) === '🌧️ Drizzly today, so 3 feels right instead of your usual 4.', 'drizzly hint: ' + await hint());
+      assert((await hint()) === '🌧️ Drizzly today, so 3 feels right.', 'drizzly hint: ' + await hint());
       await pickSky(page, 'stormy');
-      assert((await hint()).startsWith('⛈️ Stormy today, so 2 feels right instead of your usual 4.'), 'stormy hint');
+      assert((await hint()) === '⛈️ Stormy today, so 2 feels right.', 'stormy hint');
       await pickSky(page, 'sunny');
       assert((await hint()).startsWith('4 feels right today.'), 'sunny hint');
       for (let i = 0; i < 12; i++) await tap(page, 'button[data-act=usual][data-arg="1"]');
@@ -332,7 +332,7 @@ export const flows = [
       assert((await usualN(page)) === '1', 'min 1');
       await stepTo(page, 6);
       await pickSky(page, 'stormy');
-      assert((await hint()).startsWith('⛈️ Stormy today, so 3 feels right instead of your usual 6.'), 'N follows usual in any sky');
+      assert((await hint()) === '⛈️ Stormy today, so 3 feels right.', 'N follows usual in any sky');
     },
   },
   {
@@ -368,7 +368,7 @@ export const flows = [
       assert(!(await visible(page, '.modal')), 'pop-up at N');
       await teach(page, 'Two');
       await page.waitForFunction(() => !document.querySelector('.modal').hidden);
-      assert((await page.$eval('#msay', (n) => n.textContent)) === 'I learned Two! My backpack’s getting heavy, though. We usually carry about four. Want to try that?', 'pop-up text');
+      assert((await page.$eval('#msay', (n) => n.textContent)) === 'I learned Two! My backpack’s getting heavy, though. Want to try fewer today?', 'pop-up text');
       assert((await sel(page, '.modal .opt')).join('|') === 'Sure, save one for later|I’ll carry it today', 'pop-up options');
       await tap(page, 'button[data-act=heavyCarry]');
       assert((await dialog(page)) === 'Okay, I’ve got it! Let me know if it gets too heavy.', 'carry line');
