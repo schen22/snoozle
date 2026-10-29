@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 // Token check: #hex colours only in public/css/tokens.css (none in index.html, app.css, motion.css, public/js/**);
 // no digits in COPY strings (in public/js/copy.js)
-// (placeholders and one allowlisted line excepted). Prints problems (capped) and a summary; exit 1 on any.
+// (placeholders excepted). Prints problems (capped) and a summary; exit 1 on any.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
 const copyJs = readFileSync(join(root, 'public/js/copy.js'), 'utf8');
-const ALLOW = ['What would 70% look like? Good enough is still good.'];
 const problems = [];
 
 // 1. Hex colours: allowed only in public/css/tokens.css. Flag them in index.html, app.css, motion.css and every public/js/**/*.js.
@@ -29,7 +28,7 @@ if (!copy.includes('const COPY = {')) problems.push('const COPY not found in pub
 for (const [, , body] of copy.matchAll(/(['"`])((?:\\.|(?!\1)[^\\\n])*)\1/g)) {
   strings++;
   const s = body.replace(/\$\{[^}]*\}/g, '');
-  if (/\d/.test(s) && !ALLOW.some((a) => s === a)) problems.push(`digit in COPY string: ${s.slice(0, 60)}`);
+  if (/\d/.test(s)) problems.push(`digit in COPY string: ${s.slice(0, 60)}`);
 }
 console.log(`tokens: ${problems.length} problem(s); ${strings} COPY strings scanned`);
 for (const p of problems.slice(0, 5)) console.log(`  ${p}`);

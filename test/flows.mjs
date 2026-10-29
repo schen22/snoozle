@@ -1,7 +1,7 @@
 // Browser flow gate. Append flows to `flows`: { name, run(page, url) } (throw to fail).
 import { serve, openAt, closeAll } from './helpers.mjs';
 
-const GREETING = 'Hello, hello! I’m Snoozle. Thanks for stopping by! Any chance you want to hang out with me?';
+const GREETING = 'Hello, hello! I’m Snoozle. Thanks for stopping by! Want to hang out for a bit?';
 const HOME_LINE = 'What sounds nice right now?';
 const SCREENS = ['garden', 'recharge', 'moves', 'thoughts'];
 
@@ -56,10 +56,10 @@ const CARDS = {
   food: ['We’re munching side by side. Best picnic ever.', 'Crunch crunch. Thanks for feeding us both.'],
   water: ['Big slurp! My leaves just perked right up.', 'Ahh. Plants and people both run on water.'],
   rest: ['I’m curling up next to you. We recharge together.', 'Shh… nap time. The garden grows while we sleep.'],
-  pit: ['Good call. I’ll hold down the fort.', 'Bodies first, everything else after.'],
+  pit: ['Good call. I’ll hold down the fort.', 'No rush. The garden will be right here.'],
   outside: ['Fresh air! I’m rolling around in the grass.', 'Look at the sky with me for a sec.'],
 };
-const WANDER = 'The thought wandered back into the tall grass. You don’t have to catch every one.';
+const WANDER = 'The thought wandered back into the tall grass. We don’t have to catch every one.';
 const TAPS = ['Hi! I’m right here.', 'Hehe, that tickles.', 'You came to say hi? That’s the best.'];
 // [subline, question, [[option label, reply], ...]] per kind, in menu order
 const THOUGHTS = [
@@ -69,14 +69,14 @@ const THOUGHTS = [
   ['Running on empty', 'Pushing through works for one battle, not every day.', [
     ['Recharge first', 'Let’s top up first. Pick anything here and I’ll do it with you.'],
     ['Lighten today’s moves', 'Which move could wait? Saving one for later isn’t quitting.']]],
-  ['People-pleasing', 'Every yes to them is a no to something else, sometimes you.', [
-    ['Borrow a soft no', 'Try: ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.'],
-    ['Buy some time', 'Try: ‘Let me check and get back to you.’ You don’t owe an answer on the spot.']]],
+  ['People-pleasing', 'Every yes to them is a no to something else, sometimes to you.', [
+    ['Borrow a soft no', 'Want a line? ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.'],
+    ['Buy some time', 'Here’s one: ‘Let me check and get back to you.’ No answer needed on the spot.']]],
   ['Mind reading', 'Has anyone actually said that?', [
-    ['What would I tell a friend?', 'You’d tell them rest isn’t lazy. Same rules apply to you.'],
+    ['What would I tell a friend?', 'You’d tell them rest isn’t lazy. I’m telling you the same.'],
     ['Check the evidence', 'If no one said it, it’s a guess, not a fact. Guesses can be wrong.']]],
   ['All-or-nothing', 'Is there a good-enough middle?', [
-    ['Find the good-enough version', 'What would 70% look like? Good enough is still good.'],
+    ['Find the good-enough version', 'What would mostly done look like? Good enough is still good.'],
     ['Name one part that went okay', 'There’s always one. Even ‘I showed up’ counts.']]],
   ['Fortune telling', 'What’s most likely, not worst?', [
     ['Picture the most likely version', 'Most days land somewhere in the middle. This one probably will too.'],
@@ -276,7 +276,7 @@ export const flows = [
     async run(page, url) {
       await boot(page, url);
       await goto(page, 'garden');
-      assert((await dialog(page)) === 'Take a breath, close your eyes, and pick the closest sky you see. I’ll match it. Every kind of weather grows our garden.', 'garden intro wrong');
+      assert((await dialog(page)) === 'Let’s take a breath. Close your eyes: what sky do you see? I’ll match it. Every kind of weather grows our garden.', 'garden intro wrong');
       const texts = () => page.$eval('.today-garden', (n) => [...n.querySelectorAll('p,small')].map((x) => x.textContent));
       assert((await texts()).join('|') === STAGES[0].join('|'), 'seed caption wrong');
       await pickSky(page, 'sunny');
@@ -369,9 +369,9 @@ export const flows = [
       await teach(page, 'Two');
       await page.waitForFunction(() => !document.querySelector('.modal').hidden);
       assert((await page.$eval('#msay', (n) => n.textContent)) === 'I learned Two! My backpack’s getting heavy, though. Want to try fewer today?', 'pop-up text');
-      assert((await sel(page, '.modal .opt')).join('|') === 'Sure, save one for later|I’ll carry it today', 'pop-up options');
+      assert((await sel(page, '.modal .opt')).join('|') === 'Sure, save one for later|We’ll carry it today', 'pop-up options');
       await tap(page, 'button[data-act=heavyCarry]');
-      assert((await dialog(page)) === 'Okay, I’ve got it! Let me know if it gets too heavy.', 'carry line');
+      assert((await dialog(page)) === 'Okay, we’ll carry it together. We can set one down anytime.', 'carry line');
       assert(!(await visible(page, '.modal')), 'pop-up closed');
       await teach(page, 'Three');
       await tap(page, 'button[data-act=heavySave]');
@@ -392,7 +392,7 @@ export const flows = [
       assert((await sel(page, '.daycare li')).join() === 'Nothing saved yet. That’s a nice, light feeling.', 'empty future');
       await teach(page, 'Stretch'); await teach(page, 'Email');
       await tap(page, '.move:nth-child(1) button[data-act=use]');
-      assert(['Nice! That one’s done. Let’s let it count.', 'Move used! Take a breath before the next one.'].includes(await dialog(page)), 'used line');
+      assert(['Nice! That one’s done. My leaves did a little wiggle.', 'Move used! Take a breath before the next one.'].includes(await dialog(page)), 'used line');
       assert(await page.$eval('.move.used .mtext', (n) => getComputedStyle(n).textDecorationLine.includes('line-through')), 'crossed out');
       assert((await page.$$('.move.used button')).length === 0, 'buttons gone');
       assert(await page.evaluate(() => document.getElementById('buddy-react').getAnimations().length > 0), 'no sit-down breather');
@@ -555,7 +555,7 @@ export const flows = [
         return { text: document.getElementById('typed').textContent, tabs: tabs.length, menu: document.querySelector('.menu').closest('[hidden]') !== null };
       });
       assert(now.tabs === 1 && now.menu, 'screen did not switch instantly');
-      assert(now.text.startsWith('Take a breath') && now.text.length > 40, `garden line not instant: "${now.text}"`);
+      assert(now.text.startsWith('Let’s take a breath') && now.text.length > 40, `garden line not instant: "${now.text}"`);
       await pickSky(page, 'stormy');
       assert((await page.$eval('#typed', (n) => n.textContent)) === SKY_LINES.stormy, 'sky line not instant');
       await tap(page, 'button[data-act=home]');
@@ -693,7 +693,7 @@ export const flows = [
       await boot(page, url);
       // The Garden title was cut (Sarah, 2026-10-29); Snoozle's Garden line now carries the ask.
       const count = () => page.evaluate((q) => [...document.querySelectorAll('body *')]
-        .filter((n) => n.checkVisibility() && !n.closest('.sr') && n.children.length === 0 && n.textContent.includes(q)).length, 'pick the closest sky you see');
+        .filter((n) => n.checkVisibility() && !n.closest('.sr') && n.children.length === 0 && n.textContent.includes(q)).length, 'what sky do you see?');
       assert((await count()) === 0, 'forecast shown on Home');
       for (const s of SCREENS) {
         await goto(page, s);

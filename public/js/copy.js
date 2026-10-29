@@ -4,6 +4,16 @@
 //   - ${...} marks a spot code fills in (a move name, a sky name). Keep it as it is, and move it where it reads right.
 //   - Write numbers as words: no digits in strings (npm run gate:fast checks this).
 //   - No colours here. Colours live in the page's TOKENS block.
+// Voice: who is speaking decides the person.
+//   - Snoozle (any line under the SNOOZLE tag, sheets too): "I" is Snoozle, "we/our" is Snoozle and you, "you" only for your own feelings.
+//   - Narrator (bond, sceneLabel, garden captions): third person, present tense, says "Snoozle", no pronoun.
+//   - You (sheet choice buttons, placeholders): "I" is the person tapping, or a short verb. Plain controls are verbs.
+// Content rules (match the skies replies):
+//   - Never one "I" for two speakers in the same exchange. "We/us" always includes you.
+//   - React with the body (leaves, roots, rain sounds), then invite ("Listen with me?", "Let’s…"). Snoozle feels, it doesn’t advise.
+//   - Companion, not coach: no "should", no "Try:", no strings of orders. Offer, ask, or say "Let’s".
+//   - Every weather is equal: no "sunnier", "better" or "worse". No numbers or percentages.
+//   - Bubbles: three short sentences at most. Choice buttons: five words at most. No irony.
 // Loaded as a classic script before the page script, so COPY is a global.
 const COPY = {
   // Whole app: name tag on every dialog bubble, including the pop-up sheet
@@ -12,7 +22,7 @@ const COPY = {
   sceneLabel: "Snoozle in the garden",
   // Home: Snoozle says this on first arrival, on a new day and after Reset
   greeting:
-    "Hello, hello! I’m Snoozle. Thanks for stopping by! Any chance you want to hang out with me?",
+    "Hello, hello! I’m Snoozle. Thanks for stopping by! Want to hang out for a bit?",
   // Home: Snoozle says this when you tap Back to the menu
   home: "What sounds nice right now?",
   // Home: screen-reader label for the four menu buttons
@@ -76,7 +86,7 @@ const COPY = {
   garden: {
     // Snoozle on arriving at Garden before a sky is picked
     intro:
-      "Take a breath, close your eyes, and pick the closest sky you see. I’ll match it. Every kind of weather grows our garden.",
+      "Let’s take a breath. Close your eyes: what sky do you see? I’ll match it. Every kind of weather grows our garden.",
     // Garden heading above the plant picture
     card: "Today’s garden",
     // Garden caption prefix when the sky is drizzly or stormy
@@ -117,7 +127,7 @@ const COPY = {
         k: "water",
         e: "💧",
         t: "Sip some water",
-        s: "Have you hydrated?",
+        s: "Had a sip lately?",
         r: [
           "Big slurp! My leaves just perked right up.",
           "Ahh. Plants and people both run on water.",
@@ -140,7 +150,7 @@ const COPY = {
         s: "Bodies first",
         r: [
           "Good call. I’ll hold down the fort.",
-          "Bodies first, everything else after.",
+          "No rush. The garden will be right here.",
         ],
       },
       {
@@ -157,7 +167,7 @@ const COPY = {
         k: "friend",
         e: "📞",
         t: "Phone a friend",
-        s: "Grace them with your presence",
+        s: "A quick hello counts",
         r: [
           "I love hearing your friend’s voice. You sound lighter.",
           "Good teams take turns carrying each other.",
@@ -233,16 +243,16 @@ const COPY = {
     // Sheet button: save one for later
     heavySave: "Sure, save one for later",
     // Sheet button: keep it all
-    heavyCarry: "I’ll carry it today",
+    heavyCarry: "We’ll carry it today",
     // Reply after tapping the carry button
-    carry: "Okay, I’ve got it! Let me know if it gets too heavy.",
+    carry: "Okay, we’ll carry it together. We can set one down anytime.",
     // Sheet text after choosing to save one; buttons are the unfinished moves
     which: "Which one can wait?",
     // Reply after picking a move to wait
     safe: (m) => `${m} is safe in Future moves. Ahh, that’s lighter.`,
     // Reply after tapping Used it (alternates)
     used: [
-      "Nice! That one’s done. Let’s let it count.",
+      "Nice! That one’s done. My leaves did a little wiggle.",
       "Move used! Take a breath before the next one.",
     ],
     // Reply after tapping Save for later
@@ -250,7 +260,7 @@ const COPY = {
     // Heading of the Future moves list
     future: "Future moves",
     // Hint under the Future moves heading, shown when the list has moves
-    futureHint: "Moves saved here will wait for a sunnier day.",
+    futureHint: "Moves saved here wait until we want them.",
     // Button label on a Future move
     bring: "Bring back",
     // Button label on a Future move
@@ -265,7 +275,7 @@ const COPY = {
   thoughts: {
     // Snoozle on arriving at Thoughts
     intro:
-      "Rustle, rustle… a wild thought appeared! Help us catalog and name it.",
+      "Rustle, rustle… a wild thought appeared! Let’s name it together.",
     // Label above the thought box
     label: "What’s the thought?",
     // Small tag after that label
@@ -279,7 +289,7 @@ const COPY = {
     // Last sheet button on every kind; say is the reply after tapping it
     wander: {
       label: "Let it wander off",
-      say: "The thought wandered back into the tall grass. You don’t have to catch every one.",
+      say: "The thought wandered back into the tall grass. We don’t have to catch every one.",
     },
     // Thought kinds: t is the button, s the small line and sheet name, q the sheet question, opts the sheet buttons (say is the reply; go also moves to that screen)
     kinds: [
@@ -319,15 +329,15 @@ const COPY = {
       {
         t: "“I can’t say no”",
         s: "People-pleasing",
-        q: "Every yes to them is a no to something else, sometimes you.",
+        q: "Every yes to them is a no to something else, sometimes to you.",
         opts: [
           {
             label: "Borrow a soft no",
-            say: "Try: ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.",
+            say: "Want a line? ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.",
           },
           {
             label: "Buy some time",
-            say: "Try: ‘Let me check and get back to you.’ You don’t owe an answer on the spot.",
+            say: "Here’s one: ‘Let me check and get back to you.’ No answer needed on the spot.",
           },
         ],
       },
@@ -338,7 +348,7 @@ const COPY = {
         opts: [
           {
             label: "What would I tell a friend?",
-            say: "You’d tell them rest isn’t lazy. Same rules apply to you.",
+            say: "You’d tell them rest isn’t lazy. I’m telling you the same.",
           },
           {
             label: "Check the evidence",
@@ -353,7 +363,7 @@ const COPY = {
         opts: [
           {
             label: "Find the good-enough version",
-            say: "What would 70% look like? Good enough is still good.",
+            say: "What would mostly done look like? Good enough is still good.",
           },
           {
             label: "Name one part that went okay",
