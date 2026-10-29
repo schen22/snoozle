@@ -12,7 +12,10 @@ Status: **draft for Sarah's review** (2026-10-28). Product spec: [Snoozle's Gard
   No name, no friendship, no accounts, no server ([§3](#3-state)).
 - Load budget: **≤ 20 KB brotli HTML, ≤ 70 KB total transfer, LCP ≤ 2.0 s on Slow 4G**. Measured: the prototype is
   13 KB brotli; fonts add 44 KB ([§5](#5-load-time)).
-- Deviations from the spec (Sarah, 2026-10-28): no renaming; accessibility section deferred to Later.
+- Deviations from the spec (Sarah, 2026-10-28/29): no renaming; accessibility deferred; menu morph cut.
+- **Export and load** replace stored state: a "Garden Code" in a text the person keeps (notes app, message to self),
+  pasted back to restore friendship, thoughts, Future moves and today. Reuses the dragons game's Dispatch Code
+  ([§3](#export-and-load)). Accounts and server state are Later.
 - Animations: cut the menu morph (~30 lines, ~0.7 s wait on every menu tap) for an instant swap; keep the ones that
   carry meaning ([§6](#6-animation-audit)).
 - Build in 4 milestones, each closed by `npm run gate` ([§8](#8-milestones)).
@@ -48,7 +51,7 @@ is how "every tap gets immediate, visible feedback" stays true.
 |---|---|---|
 | One `index.html`, no build | Zero dependencies to update; works from `file://`; the prototype already proves the shape (789 lines) | The file passes ~1,800 lines or Backlog features need shared code (then ES modules + esbuild; loses `file://`) |
 | Vanilla JS, re-render the panel per action | ~40 controls; a framework would add 40+ KB and a build | Re-render visibly drops focus or input text (then patch only changed nodes) |
-| Cloudflare Pages ★ | Private-repo Git deploys at $0, Brotli, edge cache | Cloudflare retires Pages for new projects (then Workers static assets, same files) |
+| Cloudflare Pages | Private-repo Git deploys at $0, Brotli, edge cache | Cloudflare retires Pages for new projects (then Workers static assets, same files) |
 
 ## 2. Code layout inside `index.html`
 
@@ -128,6 +131,41 @@ act(type, arg):
 - `newDay` and "Reset prototype": close any sheet, cancel the typer and every running animation
   (`document.getAnimations()`), then reset facts and greet.
 
+### Export and load
+
+The person owns their history; the page keeps none of it. Pattern and code reused from the dragons game's
+Dispatch Code (`doodles/dragons/public/engine.js`, `toCode` / `fromCode` / `migrate`, ~20 lines).
+
+**What's exported** (one JSON object, `v: 1`):
+
+| Part | Holds | Restored on load |
+|---|---|---|
+| Lasting | `bond` (friendship acts, kept across days as a running set of `date:act`), `usual`, `futureMoves`, `thoughts` | Always |
+| Today | `date`, `sky`, `care`, `cared`, `moves` | Only when the code's `date` is today |
+
+`thoughts` is a new fact: `{date, time, kind, choice, text?}` per thought named (text only when typed, ≤ 200 chars).
+The spec's v1 rule "typed thoughts are not kept" changes to "kept in memory for the day and in exports only".
+The log keeps the newest 60 thoughts, so a code stays under ~8 KB.
+
+**Format:** `SNZ1.<fnv32 checksum>.<base64 UTF-8 JSON>`, as in dragons. The checksum catches a code truncated by a
+notes app. A load validates with the same rules as storage ([§3](#3-state): types, lengths, caps), runs
+`migrate(v)`, and renders text as text nodes. Anything invalid gives one gentle line and changes nothing.
+
+**One export, two uses:** the exported text is readable Markdown (the spec's "Export today" moments: sky, care,
+plant stage, friendship line, moves used/saved/let go, thoughts) with the code on its last line. Load accepts the
+whole text pasted back and finds the `SNZ1.` code in it. So the person's notes are both a diary and a backup.
+
+| Control | Where | Does |
+|---|---|---|
+| "Export" link | Home, beside Reset prototype | Opens a bottom sheet: **Share** (`navigator.share`, phones) · **Copy** (clipboard) · **Download** (`.md` file, desktop fallback) |
+| "Load" link | Same row | Bottom sheet with a paste box + **Load**. Confirms in Snoozle's voice what came back |
+
+- Friendship across days: with a loaded code, `bond` keeps earlier days' acts, so the higher lines ("every kind of
+  weather together") become reachable honestly, over many days and only for someone who keeps their code.
+- Privacy: the code is base64, not encrypted. Anyone holding it can read the thoughts in it. No server ever sees it.
+  The Export sheet says so in one line ([Q11](#10-open-questions)).
+- Copy for both sheets is new (the spec has none). Drafts go to Sarah before M5 ([Q11](#10-open-questions)).
+
 - **Not stored, by decision:** name (no renaming), friendship (6 lines, reachable within one day), usual, the day.
 - **Consequence:** a mid-day refresh or a phone closing the tab returns to the first-visit greeting with an empty
   day (Future moves stay). Accepted for v1; Export today ([PLAN Next](PLAN.md#next)) is how a person keeps a day.
@@ -156,15 +194,16 @@ act(type, arg):
 Preview deploys: each branch gets its own `*.pages.dev` URL, so a change can be checked on a phone before merge.
 Rollback: Pages keeps every deployment; "Rollback" in the dashboard restores one in seconds.
 
-**The site is public.** A private repo hides the code, not the page: anyone with the `pages.dev` URL can open it,
-and search engines can find it. To make the page itself private, put Cloudflare Access in front (free up to 50
-users, email one-time code, no code change) ★ ([Q8](#10-open-questions)). Either way, ship a `_headers` file:
+**The site is public (decided 2026-10-29).** A private repo hides the code, not the page: anyone with the
+`pages.dev` URL can open it. No user data is on the server, so nothing leaks; Cloudflare Access (free, no code
+change) stays available if that changes. Ship a `_headers` file, which also asks search engines not to index it:
 
 ```text
 /*
   Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex
 ```
 
 `'unsafe-inline'` is the price of one self-contained file; the rule that user text is never parsed as HTML
@@ -276,16 +315,18 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | M1 Shell | `index.html` from the prototype; tokens; scene + Snoozle sprites kept as drawn (sprite check in the gate); Home, menu, Back; dialog typer; clock; `spec/copy.json`; gates; Pages deploy | Home works on a phone at the Pages URL; gate passes; perf printed |
 | M2 Care | Garden (skies, rain, leaf shelter, plant stages) and Recharge Center; friendship line | Their acceptance criteria pass in `gate` |
 | M3 Moves | Move tutor, backpack and strain, pop-ups, Future moves + storage | Teach past N never blocks; Future moves survive reload |
-| M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
+| M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; thoughts log; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
+| M5 Export and load | Garden Code, Markdown export, Share / Copy / Download, Load sheet, migrate | Export → wipe → load restores lasting facts exactly (and today's if same date); a truncated or edited code changes nothing; gate covers both |
 
 ## 9. Trade-offs taken
 
 | Chose | Over | Because | Cost |
 |---|---|---|---|
 | Store Future moves only | Store the whole day | Least data on the device; matches "missing a day costs nothing" | A refresh wipes today |
+| Export/load code ([§3](#export-and-load)) | Accounts, server sync | Person owns their data; $0; no auth, no privacy policy for stored thoughts | They must keep the code; no automatic sync across devices |
 | No renaming | Rename + store the name | One less screen, no stored identity | Spec copy for renaming dropped |
 | Defer accessibility | Spec's full section now | Sarah's call, 2026-10-28: ship the experience first | Screen readers and keyboard users underserved until Later; `aria-live`, real `<button>`s and reduced motion kept because they cost nothing |
-| Instant screen swap ★ | Spec's menu morph | ~0.7 s faster per tap, no JS layout code, no double-tap race | Less "handheld menu" charm |
+| Instant screen swap | Spec's menu morph | ~0.7 s faster per tap, no JS layout code, no double-tap race | Less "handheld menu" charm |
 | Google Fonts | Self-hosted fonts | Spec; one file | 2 extra connections, IP to Google |
 | Hand-written `act()` + `render()` | A tiny framework (Preact, Alpine) | No dependency, no build | Discipline: no DOM edits outside `render()` / `FX` |
 
@@ -293,13 +334,14 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 
 | # | Question | Default ★ | Blocks |
 |---|---|---|---|
-| 1 | Cloudflare Pages or Workers static assets? (food-planner chose Workers as Cloudflare's path for new projects) | Pages: Git-connect with no config | M1 deploy |
+| 1 | ✅ Cloudflare Pages (2026-10-29) | — | — |
 | 2 | Should `usual` (B) also be stored? It's one number and resets to 4 daily otherwise | No (Sarah: store as little as possible) | M3 |
-| 3 | Mid-day refresh or iPhone tab discard wipes the day ([§3](#3-state)): acceptable for v1? | Yes; revisit after a week of use | M1 |
+| 3 | ✅ A refresh wiping the day is fine for v1; Export/load covers keeping things; server state is Later (2026-10-29) | — | — |
 | 4 | "About four" in the over-limit pop-up: keep hard-coded or say B? | Keep (spec v1) | M3 |
-| 5 | Snorlax/Ditto in the cloudy line: keep? Only safe while the page is private ([Q8](#10-open-questions)) | Keep if Access is on; else the spec's "sleepy giant / blob" line | M2 |
+| 5 | ✅ Keep Snorlax/Ditto for now, page public (2026-10-29); swap before sharing the link widely | — | — |
 | 6 | A gentle support link for crisis days (spec risk) | Not in v1 | — |
-| 7 | Cut the menu morph and cursor blink (spec "Selecting an option", [§6](#6-animation-audit))? | Yes: instant swap + 150 ms fade | M1 |
-| 8 | Should the page itself be private (Cloudflare Access, [§4](#4-hosting-and-cost)) or public by URL? | Private with Access | M1 deploy |
-| 9 | Friendship from distinct acts only ([§3](#derived-values))? With the daily reset, drop the "35 · every kind of weather" line (a multi-day claim) and keep 0/2/6/12/20? | Yes to both | M2 |
+| 7 | ✅ Cut the menu morph and cursor blink (2026-10-29) | — | — |
+| 8 | ✅ Public page, private repo, no Access (2026-10-29) | — | — |
+| 9 | Friendship from distinct acts only ([§3](#derived-values))? Keep all 6 lines, since a loaded code carries friendship across days ([§3](#export-and-load)) | Yes to both | M2 |
 | 10 | Soften strain to a short tremble, then a slow sag ([§6](#6-animation-audit))? | Yes | M3 |
+| 11 | Copy for the Export and Load sheets, incl. the one-line privacy note ("Anyone with this code can read what's in it") and the code's name ("Garden Code")? | Claude drafts in Snoozle's voice, Sarah approves | M5 |

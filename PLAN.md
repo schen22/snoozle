@@ -11,13 +11,18 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 - [ ] M1 Shell — `index.html` from the prototype, tokens, scene, Home + menu + Back, dialog, clock,
       `spec/copy.json`, gates (`budget.mjs`, copy check, puppeteer flows), first Pages deploy, `npm run perf`.
-- [ ] **Sarah:** decide Access or public ([Q8](ARCHITECTURE.md#10-open-questions)), then connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
+- [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
       build command none, output directory `/`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph).
-- [ ] Export today (spec Backlog, next up after M4).
+- [ ] M5 Export and load — Garden Code + Markdown export, Share / Copy / Download, Load
+      ([ARCHITECTURE §3](ARCHITECTURE.md#export-and-load)). Priority over any stored state.
 
 ## Later
+
+- Keep state and memory between visits without a code: options are a date-keyed `localStorage` mirror (~10 lines,
+  one device), then user sessions with server storage (Cloudflare Worker + D1 or KV, a login, a privacy note for
+  stored thoughts). Not needed now (Sarah, 2026-10-29); Export/load covers it.
 
 - Accessibility pass from the spec: screen-reader labels, focus ring and focus moves, WCAG AA contrast in both themes.
 - Spec "Later ideas": learn the usual, big/small moves, hide the stepper, "Not sure?" sky helper.
@@ -54,3 +59,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   spams `aria-live`; dim lightning.
 - 2026-10-29 — **Prototype sprites kept as drawn** ([reference/prototype.html](reference/prototype.html)); a gate check in M1
   fails if any SVG shape changes without updating the reference.
+- 2026-10-29 — Sarah's calls: **Cloudflare Pages**; **public page, private repo**, no Access; keep Snorlax/Ditto for
+  now; **cut the menu morph**; a refresh wiping the day is fine.
+- 2026-10-29 — **Export and load instead of stored state** (M5): one Markdown export with a `SNZ1.` Garden Code on its
+  last line, pasted back to restore friendship, thoughts, Future moves and (same day) today. Reuses the dragons
+  Dispatch Code. Accounts and server state go to Later.

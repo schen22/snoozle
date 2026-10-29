@@ -30,7 +30,7 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 - One `index.html`, inline CSS + vanilla JS. No framework, build, backend, accounts, analytics, or network calls
   beyond Google Fonts. No new dependency without a named need (dev-only `puppeteer-core` is the one allowed).
-- Stored: Future moves only (`localStorage` `snoozle:v1`). Nothing else persists ([ARCHITECTURE §3](ARCHITECTURE.md#3-state)).
+- Stored: Future moves only (`localStorage` `snoozle:v1`). Everything else lasts only through the person's own export code ([ARCHITECTURE: Export and load](ARCHITECTURE.md#export-and-load)).
 - Load: ≤ 20 KB brotli HTML, LCP ≤ 2.0 s on Slow 4G ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).
 - Mobile first: no horizontal scroll from 320 px, tap targets ≥ 44 px, inputs 16 px, safe-area padding.
 - Sprites: keep the prototype's SVG shapes as drawn ([reference/prototype.html](reference/prototype.html)); redraws are deliberate.
