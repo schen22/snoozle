@@ -284,6 +284,143 @@ export const flows = [
       assert(await page.$('.fl.word'), 'no relief word');
     },
   },
+  {
+    name: 'moves: hint line and stepper',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      const hint = () => page.$eval('section.tab:nth-of-type(3) > .hint', (n) => n.textContent);
+      assert((await hint()) === '4 feels right today. You can carry more, but it gets heavy.', 'plain hint');
+      assert((await usualN(page)) === '4', 'default usual');
+      await pickSky(page, 'drizzly');
+      assert((await hint()) === '🌧️ Drizzly today, so 3 feels right instead of your usual 4. You can carry more, but it gets heavy.', 'drizzly hint: ' + await hint());
+      await pickSky(page, 'stormy');
+      assert((await hint()).startsWith('⛈️ Stormy today, so 2 feels right instead of your usual 4.'), 'stormy hint');
+      await pickSky(page, 'sunny');
+      assert((await hint()).startsWith('4 feels right today.'), 'sunny hint');
+      for (let i = 0; i < 12; i++) await tap(page, 'button[data-act=usual][data-arg="1"]');
+      assert((await usualN(page)) === '10', 'max 10');
+      assert(await page.$eval('button[data-act=usual][data-arg="1"]', (n) => n.disabled), '+ not disabled at 10');
+      await tap(page, 'button[data-act=usual][data-arg="-1"]');
+      assert((await dialog(page)) === 'Got it. On a sunny day, we’ll aim for 9.', 'stepper line');
+      for (let i = 0; i < 12; i++) await tap(page, 'button[data-act=usual][data-arg="-1"]');
+      assert((await usualN(page)) === '1', 'min 1');
+      await stepTo(page, 6);
+      await pickSky(page, 'stormy');
+      assert((await hint()).startsWith('⛈️ Stormy today, so 3 feels right instead of your usual 6.'), 'N follows usual in any sky');
+    },
+  },
+  {
+    name: 'moves: grid cells and teach',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      const cells = () => page.$$eval('.moves .move', (c) => c.map((n) => n.className.includes('empty') ? n.textContent : 'M:' + n.querySelector('.mtext').textContent));
+      assert((await cells()).join() === '—,—,—,—', 'four empty cells');
+      await stepTo(page, 6);
+      assert((await cells()).length === 6, 'six cells at usual 6');
+      await teach(page, 'Call Mom');
+      assert((await dialog(page)) === 'I learned Call Mom!', 'learned line');
+      assert((await cells())[0] === 'M:Call Mom' && (await cells()).length === 6, 'grid fills');
+      await page.focus('#newmove');
+      await page.keyboard.type('Walk');
+      await page.keyboard.press('Enter');
+      assert((await dialog(page)) === 'I learned Walk!', 'Enter teaches');
+      assert((await page.$eval('#newmove', (n) => n.maxLength)) === 40, 'maxlength');
+      await teach(page, 'x'.repeat(60));
+      assert((await sel(page, '.mtext'))[2].length === 40, 'trimmed to 40');
+      assert(!(await visible(page, '.modal')), 'no pop-up within N');
+    },
+  },
+  {
+    name: 'moves: past N pop-up, save one, carry',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      await stepTo(page, 1);
+      await pickSky(page, 'sunny');
+      await teach(page, 'One');
+      assert(!(await visible(page, '.modal')), 'pop-up at N');
+      await teach(page, 'Two');
+      await page.waitForFunction(() => !document.querySelector('.modal').hidden);
+      assert((await page.$eval('#msay', (n) => n.textContent)) === 'I learned Two! My backpack’s getting heavy, though. We usually carry about four. Want to try that?', 'pop-up text');
+      assert((await sel(page, '.modal .opt')).join('|') === 'Sure, save one for later|I’ll carry it today', 'pop-up options');
+      await tap(page, 'button[data-act=heavyCarry]');
+      assert((await dialog(page)) === 'Okay, I’ve got it! Let me know if it gets too heavy.', 'carry line');
+      assert(!(await visible(page, '.modal')), 'pop-up closed');
+      await teach(page, 'Three');
+      await tap(page, 'button[data-act=heavySave]');
+      assert((await page.$eval('#msay', (n) => n.textContent)) === 'Which one can wait?', 'which title');
+      assert((await sel(page, '.modal .opt')).join('|') === 'One|Two|Three', 'which lists moves');
+      await tap(page, '.modal button[data-act=wait][data-arg$="-2"]');
+      assert((await dialog(page)) === 'Two is safe in Future moves. Ahh, that’s lighter.', 'safe line');
+      assert((await sel(page, '.mtext')).join() === 'One,Three', 'Two left the grid');
+      assert((await sel(page, '.daycare li span:first-child')).join() === 'Two', 'Two in future');
+    },
+  },
+  {
+    name: 'moves: used it, save for later, future moves',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      await pickSky(page, 'sunny');
+      assert((await sel(page, '.daycare li')).join() === 'Nothing saved yet. That’s a nice, light feeling.', 'empty future');
+      await teach(page, 'Stretch'); await teach(page, 'Email');
+      await tap(page, '.move:nth-child(1) button[data-act=use]');
+      assert(['Nice! That one’s done. Let’s let it count.', 'Move used! Take a breath before the next one.'].includes(await dialog(page)), 'used line');
+      assert(await page.$eval('.move.used .mtext', (n) => getComputedStyle(n).textDecorationLine.includes('line-through')), 'crossed out');
+      assert((await page.$$('.move.used button')).length === 0, 'buttons gone');
+      assert(await page.evaluate(() => document.getElementById('buddy-react').getAnimations().length > 0), 'no sit-down breather');
+      await tap(page, '.move:nth-child(2) button[data-act=save]');
+      assert((await dialog(page)) === 'Email is saved in Future moves. It’ll wait.', 'save line');
+      assert((await page.$eval('.fl.word', (n) => n.textContent).catch(() => '')) === 'phew~', 'no phew~');
+      await page.reload({ waitUntil: 'load' }); await page.waitForSelector('#typed');
+      await goto(page, 'moves');
+      await page.waitForFunction(() => document.querySelectorAll('.daycare li button').length > 0);
+      assert((await sel(page, '.daycare li span:first-child')).join() === 'Email', 'future survives reload');
+      await tap(page, '.daycare button[data-act=bring]');
+      assert((await dialog(page)) === 'Welcome back, Email!', 'welcome line');
+      assert((await sel(page, '.mtext')).join() === 'Email', 'brought back');
+      await tap(page, '.move:nth-child(1) button[data-act=save]');
+      await tap(page, '.daycare button[data-act=letgo]');
+      assert((await dialog(page)) === 'Bye, Email. Letting go is a move too.', 'bye line');
+      assert((await sel(page, '.daycare li')).join() === 'Nothing saved yet. That’s a nice, light feeling.', 'empty again');
+    },
+  },
+  {
+    name: 'moves: strain while heavy',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      await stepTo(page, 1);
+      await pickSky(page, 'sunny');
+      const face = () => page.evaluate(() => ['.mouth-strain', '.brows', '.sweat'].map((s) => getComputedStyle(document.querySelector('#scene ' + s)).display !== 'none').join());
+      assert((await face()) === 'false,false,false', 'strain face before heavy');
+      await teach(page, 'One'); await teach(page, 'Two');
+      await tap(page, 'button[data-act=heavyCarry]');
+      assert((await face()) === 'true,true,true', 'strain face while heavy');
+      assert(await page.$eval('.mouth-happy', (n) => getComputedStyle(n).display === 'none'), 'happy mouth hidden');
+      const t = await page.evaluate(() => document.getElementById('buddy-react').getAnimations().map((a) => a.effect.getTiming().duration));
+      assert(t.includes(1200), 'no 1.2s tremble on crossing: ' + t);
+      const sag = await page.$eval('#buddy-pose', (n) => [getComputedStyle(n).animationName, getComputedStyle(n).animationDuration].join());
+      assert(sag === 'sag,2.4s', 'sag loop ' + sag);
+      await tap(page, '.move:nth-child(2) button[data-act=save]');
+      assert((await face()) === 'false,false,false', 'strain face after save');
+    },
+  },
+  {
+    name: 'moves: typed text is inert',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      await teach(page, '<img src=x onerror=alert(1)>');
+      assert((await page.$$('.moves img, #typed img, #msay img')).length === 0, 'img element created');
+      assert((await sel(page, '.mtext'))[0] === '<img src=x onerror=alert(1)>', 'shown as text');
+      assert((await dialog(page)) === 'I learned <img src=x onerror=alert(1)>!', 'say line as text');
+      await tap(page, '.move:nth-child(1) button[data-act=save]');
+      assert((await page.$$('.daycare img')).length === 0, 'img in future');
+    },
+  },
 ];
 
 const failures = [];
