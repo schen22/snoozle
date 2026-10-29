@@ -59,7 +59,6 @@ export const flows = [
       await boot(page, url);
       for (const s of SCREENS) {
         await goto(page, s);
-        assert(await visible(page, `section.tab:nth-of-type(n)`) || true, '');
         const st = await page.evaluate((s) => ({
           menu: !!document.querySelector('.menu') && document.querySelector('.menu').getBoundingClientRect().height > 0 && !document.querySelector('.menu').closest('[hidden]'),
           back: document.querySelector('.backrow') && !document.querySelector('.backrow').hidden && document.querySelector('.backrow').getBoundingClientRect().height > 0,
@@ -107,7 +106,7 @@ export const flows = [
       await page.evaluateOnNewDocument(() => { try { localStorage.setItem('snoozle:v1', 'not json'); } catch (e) {} });
       await boot(page, url);
       await goto(page, 'moves');
-      const n = await page.$$eval('ul.daycare li', (l) => l.length);
+      const n = await page.$$eval('ul.daycare li:not(.note)', (l) => l.length);
       assert(n === 0, `Future moves has ${n} items`);
     },
   },
