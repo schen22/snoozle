@@ -41,7 +41,8 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 ## Working rules
 
-YAGNI and the one-pass Haiku review are global (`~/.claude/CLAUDE.md` § How we work, `review-gates` Gate 1).
+YAGNI is global (`~/.claude/CLAUDE.md`, stakes in `working-model`); reviews follow `review-gates` (Gate 1 inline,
+a Sonnet reviewer for risky JS changes).
 Where Snoozle sits on that scale: a personal v1 on a public URL with no user data on the server, so nearer
 quick than production. It gets gates and the architecture rules, but no extra abstraction, config or tests
 beyond the spec's acceptance criteria.
