@@ -1,4 +1,5 @@
 // Boot: build the screens, wire taps, history, clock and storage, load Future moves, start the day.
+import {COPY} from './copy.js';
 import {state} from './state.js';
 import {store} from './store.js';
 import {watchDay} from './clock.js';
@@ -28,4 +29,4 @@ document.addEventListener('click', e => {
 Promise.resolve(store.load()).then(future => { act('sync', future); act('newDay'); });
 watchDay(() => state.date, () => act('newDay'));
 addEventListener('storage', e => { if (e.key === store.key || e.key === null) act('sync', store.load()); });
-if (navigator.webdriver) window.__snoozle = {state, act}; // browser tests only
+if (navigator.webdriver) window.__snoozle = {state, act, COPY}; // browser tests only
