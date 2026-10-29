@@ -5,5 +5,8 @@
   "scripts": {
     "gate:fast": "node scripts/check-docs.mjs",
     "gate": "npm run gate:fast"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0"
   }
 }
