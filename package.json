@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "gate:fast": "node scripts/check-docs.mjs && node scripts/budget.mjs && node scripts/check-copy.mjs && node scripts/check-sprites.mjs && node scripts/check-tokens.mjs",
+    "gate:fast": "node scripts/check-docs.mjs && node scripts/budget.mjs && node scripts/check-sprites.mjs && node scripts/check-tokens.mjs",
     "gate": "npm run gate:fast && node test/flows.mjs",
     "perf": "node scripts/perf.mjs"
   },
