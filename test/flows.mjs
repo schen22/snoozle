@@ -53,11 +53,12 @@ const STAGES = [
 ];
 const BOND = ['Snoozle is peeking at you from behind a leaf.', 'Snoozle is warming up to you.', 'Snoozle hums a little when you’re around.'];
 const CARDS = {
-  food: ['We’re munching side by side. Best picnic ever.', 'Crunch crunch. Thanks for feeding us both.'],
-  water: ['Big slurp! My leaves just perked right up.', 'Ahh. Plants and people both run on water.'],
+  food: ['We’re munching side by side. Best picnic ever.', 'Big slurp! My leaves just perked right up.'],
   rest: ['I’m curling up next to you. We recharge together.', 'Shh… nap time. The garden grows while we sleep.'],
   pit: ['Good call. I’ll hold down the fort.', 'No rush. The garden will be right here.'],
-  outside: ['Fresh air! I’m rolling around in the grass.', 'Look at the sky with me for a sec.'],
+  friend: ['I love hearing your friend’s voice. You sound lighter.', 'My roots feel steadier already. We don’t have to carry it all alone.'],
+  art: ['Ooh, can I add a leaf to it?', 'Making just for fun. No grades around here.'],
+  move: ['Wiggle wiggle! My roots feel looser.', 'Fresh air! I’m rolling around in the grass.'],
 };
 const WANDER = 'The thought wandered back into the tall grass. We don’t have to catch every one.';
 const TAPS = ['Hi! I’m right here.', 'Hehe, that tickles.', 'You came to say hi? That’s the best.'];
@@ -220,7 +221,7 @@ export const flows = [
       await boot(page, url);
       await goto(page, 'recharge');
       assert((await dialog(page)) === 'Pick anything, big or small. It all counts, and I’ll recharge right along with you.', 'recharge intro wrong');
-      const keys = ['food', 'water', 'rest', 'pit', 'outside'];
+      const keys = ['food', 'rest', 'pit', 'friend', 'art'];
       let grew = 0, stage = 0;
       const WANT = [1, 1, 2, 2, 3]; // stage after each of the 5 taps (water 1..5)
       assert((await caption(page)) === STAGES[0][0], 'not a seed at start');
@@ -243,10 +244,10 @@ export const flows = [
       }
       assert(grew === 3, `new stages ${grew}, wanted 3`);
       assert((await caption(page)) === STAGES[3][0], 'not in bloom after 5 cards');
-      await careTap(page, 'water');
-      assert((await dialog(page)) === CARDS.water[1], 'second tap reply is not the alternate');
-      await careTap(page, 'water');
-      assert((await dialog(page)) === CARDS.water[0], 'third tap did not return to first reply');
+      await careTap(page, 'rest');
+      assert((await dialog(page)) === CARDS.rest[1], 'second tap reply is not the alternate');
+      await careTap(page, 'rest');
+      assert((await dialog(page)) === CARDS.rest[0], 'third tap did not return to first reply');
     },
   },
   {
@@ -261,7 +262,7 @@ export const flows = [
       await careTap(page, 'food');
       assert((await bondIdx(page)) === 1, 'friendship 2 should be "warming up"');
       // [card, expected line index]: friendship 2,2,3,4,4,5,6
-      for (const [k, want] of [['food', 1], ['water', 1], ['rest', 1], ['rest', 1], ['outside', 1], ['pit', 2]]) {
+      for (const [k, want] of [['food', 1], ['move', 1], ['rest', 1], ['rest', 1], ['friend', 1], ['pit', 2]]) {
         await careTap(page, k);
         const i = await bondIdx(page);
         assert(i === want, `after ${k}: line ${i}, wanted ${want}`);
@@ -604,7 +605,7 @@ export const flows = [
       await pickSky(page, 'cloudy'); await dialog(page); await scan('sky');
       await tap(page, 'button[data-act=home]');
       await goto(page, 'recharge'); await dialog(page); await scan('recharge');
-      for (const k of ['food', 'water', 'rest', 'pit', 'outside']) { await careTap(page, k); await dialog(page); await scan('care ' + k); }
+      for (const k of ['food', 'rest', 'pit', 'move', 'friend']) { await careTap(page, k); await dialog(page); await scan('care ' + k); }
       await tap(page, 'button[data-act=home]');
       await goto(page, 'moves'); await dialog(page); await scan('moves', true);
       for (const m of ['Walk', 'Call', 'Nap']) { await teach(page, m); await dialog(page); await scan('teach ' + m); }
@@ -721,7 +722,7 @@ export const flows = [
       await goto(page, 'garden'); await pickSky(page, 'drizzly');
       await tap(page, 'button[data-act=home]');
       await goto(page, 'recharge');
-      for (const k of ['food', 'water', 'rest', 'pit', 'outside']) await careTap(page, k);
+      for (const k of ['food', 'rest', 'pit', 'move', 'friend']) await careTap(page, k);
       await tap(page, 'button[data-act=home]');
       await goto(page, 'moves');
       await stepTo(page, 2);

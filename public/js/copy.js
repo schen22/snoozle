@@ -116,21 +116,11 @@ export const COPY = {
       {
         k: "food",
         e: "🍙",
-        t: "Share food",
-        s: "Have you eaten?",
+        t: "Eat or drink",
+        s: "Had a bite or sip?",
         r: [
           "We’re munching side by side. Best picnic ever.",
-          "Crunch crunch. Thanks for feeding us both.",
-        ],
-      },
-      {
-        k: "water",
-        e: "💧",
-        t: "Sip some water",
-        s: "Had a sip lately?",
-        r: [
           "Big slurp! My leaves just perked right up.",
-          "Ahh. Plants and people both run on water.",
         ],
       },
       {
@@ -151,16 +141,6 @@ export const COPY = {
         r: [
           "Good call. I’ll hold down the fort.",
           "No rush. The garden will be right here.",
-        ],
-      },
-      {
-        k: "outside",
-        e: "🌳",
-        t: "Step outside",
-        s: "Smell the fresh air",
-        r: [
-          "Fresh air! I’m rolling around in the grass.",
-          "Look at the sky with me for a sec.",
         ],
       },
       {
@@ -187,10 +167,10 @@ export const COPY = {
         k: "move",
         e: "🤸",
         t: "Wiggle around",
-        s: "Stretch, dance, walk",
+        s: "Stretch or step out",
         r: [
           "Wiggle wiggle! My roots feel looser.",
-          "That felt good. Want to do a little more, or rest?",
+          "Fresh air! I’m rolling around in the grass.",
         ],
       },
     ],
