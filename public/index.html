@@ -342,7 +342,7 @@ const COPY = {
     carry: 'Okay, I’ve got it! Let me know if it gets too heavy.',
     which: 'Which one can wait?',
     safe: m => `${m} is safe in Future moves. Ahh, that’s lighter.`,
-    used: ['Nice! That one’s done. No need to fill the slot right away.', 'Move used! Take a breath before the next one.'],
+    used: ['Nice! That one’s done. Let’s let it count.', 'Move used! Take a breath before the next one.'],
     saved: m => `${m} is saved in Future moves. It’ll wait.`,
     future: 'Future moves',
     futureHint: 'Moves saved here will wait for a sunnier day.',
@@ -395,11 +395,12 @@ function derive(s) {
   const water = (s.sky ? SKY[s.sky].water : 0) + s.care;
   const N = nFor(s.sky, s.usual);
   const unfinished = s.moves.filter(m => !m.used).length;
+  const load = s.moves.length; // taught today and still in the day (used + unfinished)
   const friendship = s.bond.size;
   return {
-    sky: s.sky, usual: s.usual, water, N, unfinished, friendship,
+    sky: s.sky, usual: s.usual, water, N, unfinished, load, friendship,
     stage: STAGE_AT.filter(t => water >= t).length - 1,
-    heavy: unfinished > N,
+    heavy: load > N && unfinished >= 1,
     line: BOND_AT.filter(t => friendship >= t).length - 1
   };
 }
@@ -684,11 +685,11 @@ function renderMoves(d) {
   ui.moveHint.textContent = S && d.N < d.usual ? M.hintBelow(S.e, S.label, d.N, d.usual) : M.hintOk(d.N);
   ui.usual.textContent = d.usual;
   ui.down.disabled = d.usual <= 1; ui.up.disabled = d.usual >= 10;
-  const cells = []; let rank = 0;
+  const cells = [];
   for (let i = 0; i < Math.max(d.N, state.moves.length); i++) {
     const m = state.moves[i];
     if (!m) { cells.push(el('div', {class: 'move empty'}, M.dash)); continue; }
-    const over = !m.used && rank++ >= d.N;
+    const over = !m.used && i >= d.N;
     cells.push(el('div', {class: 'move' + (m.used ? ' used' : '') + (over ? ' heavy' : '')},
       el('span', {class: 'mtext'}, m.text),
       m.used ? null : el('span', {class: 'mrow'}, btn('use', m.id, 'mini', M.useIt), btn('save', m.id, 'mini', M.saveIt))));
@@ -760,7 +761,7 @@ function body(name) {
 }
 function float(emoji, at, i = 0, word = false) {
   const wrap = $('scene-wrap');
-  if (reduced() || wrap.querySelectorAll('.fl').length >= 4) return;
+  if (reduced() || (!word && wrap.querySelectorAll('.fl').length >= 4)) return; // the "phew~" word is never dropped
   const s = el('span', {class: 'fl' + (word ? ' word' : ''), style: `left:${at.left + Math.random() * 20}%;top:${at.top + Math.random() * 15}%`}, emoji);
   wrap.append(s);
   const a = play(s, [{opacity: 0, transform: 'translateY(0) scale(.7)'}, {opacity: 1, offset: .15}, {opacity: 0, transform: 'translateY(-70px) scale(1.2)'}], 1300, 'ease-out', i * 150);

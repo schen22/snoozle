@@ -64,6 +64,19 @@ const bondIdx = async (page) => BOND.indexOf(await page.$eval('.bond', (n) => n.
 const pickSky = (page, s) => tap(page, `button[data-act=sky][data-arg=${s}]`);
 const careTap = (page, k) => tap(page, `button[data-act=care][data-arg=${k}]`);
 
+const teach = async (page, text) => {
+  await page.$eval('#newmove', (n, t) => { n.value = t; }, text);
+  await tap(page, 'button[data-act=teach]');
+};
+const heavy = (page) => page.$eval('#scene', (n) => n.classList.contains('heavy'));
+const usualN = (page) => page.$eval('.baseline b', (n) => n.textContent);
+const sel = (page, s) => page.$$eval(s, (ns) => ns.map((n) => n.textContent));
+const tapAll = (page, s) => page.$$eval(s, (ns) => ns.forEach((n) => n.click()));
+const stepTo = async (page, v) => { // usual down to 1 then up to v
+  for (let i = 0; i < 9; i++) await tap(page, 'button[data-act=usual][data-arg="-1"]');
+  for (let i = 1; i < v; i++) await tap(page, 'button[data-act=usual][data-arg="1"]');
+};
+
 export const flows = [
   {
     name: 'first open',
@@ -248,6 +261,27 @@ export const flows = [
       assert(c === STAGES[1][0] && s === 'Watered by today’s rain. ' + STAGES[1][1], `rain caption "${s}"`);
       await pickSky(page, 'stormy');
       assert((await texts()).length === 2 && (await texts())[1].startsWith('Watered by today’s rain.'), 'stormy caption lacks rain line');
+    },
+  },
+  {
+    name: 'moves: load counts used moves (N=2)',
+    async run(page, url) {
+      await boot(page, url);
+      await goto(page, 'moves');
+      await stepTo(page, 4);
+      await pickSky(page, 'stormy'); // round(4/2) = 2
+      await teach(page, 'A'); await teach(page, 'B');
+      await tapAll(page, 'button[data-act=use]');
+      assert(!(await heavy(page)), 'heavy at load 2');
+      await teach(page, 'C');
+      await page.waitForFunction(() => document.getElementById('scene').classList.contains('heavy'));
+      assert(await visible(page, '.modal'), 'no pop-up past N');
+      await tap(page, 'button[data-act=heavyCarry]');
+      const flags = await page.$$eval('.move', (c) => c.map((n) => n.classList.contains('heavy')));
+      assert(flags.join() === 'false,false,true', 'pink border flags ' + flags);
+      await tap(page, '.move:nth-child(3) button[data-act=save]');
+      await page.waitForFunction(() => !document.getElementById('scene').classList.contains('heavy'));
+      assert(await page.$('.fl.word'), 'no relief word');
     },
   },
 ];
