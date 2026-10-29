@@ -124,11 +124,11 @@ export const flows = [
         await goto(page, s);
         const st = await page.evaluate((s) => ({
           menu: !!document.querySelector('.menu') && document.querySelector('.menu').getBoundingClientRect().height > 0 && !document.querySelector('.menu').closest('[hidden]'),
-          back: [...document.querySelectorAll('button[data-act=home]')].filter((b) => !b.closest('[hidden]') && b.getBoundingClientRect().height > 0).length === 2,
+          back: [...document.querySelectorAll('button[data-act=home]')].filter((b) => !b.closest('[hidden]') && b.getBoundingClientRect().height > 0).length === 1,
           tabs: [...document.querySelectorAll('section.tab')].filter((t) => !t.hidden && t.getBoundingClientRect().height > 0).length,
         }), s);
         assert(!st.menu, `${s}: menu still visible`);
-        assert(st.back, `${s}: top and bottom Back not both shown`);
+        assert(st.back, `${s}: not exactly one Back shown`);
         assert(st.tabs === 1, `${s}: ${st.tabs} tabs visible`);
         await tap(page, 'button[data-act=home]');
         const h = await page.evaluate(() => ({
@@ -620,6 +620,21 @@ export const flows = [
       await tap(page, '.modal .opts button:nth-child(1)'); await dialog(page); await scan('thought reply');
       await tap(page, 'button[data-act=home]'); await scan('home after');
       assert(!seen.length, 'digits: ' + seen.join('; '));
+    },
+  },
+  {
+    name: 'phone back gesture returns Home',
+    async run(page, url) {
+      await boot(page, url);
+      for (const s of SCREENS) {
+        await goto(page, s);
+        await page.evaluate(() => history.back());
+        await page.waitForFunction(() => !document.querySelector('.menu').closest('[hidden]'), { timeout: 2000 });
+      }
+      await goto(page, 'moves');
+      await tap(page, 'button[data-act=home]');
+      await page.waitForFunction(() => history.state === null, { timeout: 2000 });
+      assert(page.url() === url || page.url().startsWith(url), 'left the page: ' + page.url());
     },
   },
   {

@@ -167,7 +167,6 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
 .menu button{display:flex;align-items:center;gap:8px;text-align:left;background:transparent;border:2px solid transparent;border-radius:8px;padding:8px 10px;font-weight:800;font-size:15px;line-height:1.15}
 .menu button .em{font-size:22px}
 .menu button:active{transform:translateY(1px)}
-.backrow{margin-top:18px}
 .back-top{position:absolute;top:8px;left:8px;z-index:2;padding:4px 12px;font-size:14px}
 .back{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2.5px solid var(--line);border-radius:8px;padding:7px 14px;font-weight:800;font-size:15px;box-shadow:0 3px 0 var(--line)}
 .back::before{content:"◂";color:var(--heart)}
@@ -204,7 +203,7 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
   #scene.heavy #buddy-pose{animation:sag 2.4s ease-in-out infinite}
   #typed::after{animation:blink 1s steps(2) infinite}
   .grass-anim{animation:rustle .25s ease-in-out 6}
-  .tab:not([hidden]),.backrow:not([hidden]),#home:not([hidden]){animation:enter var(--t-quick) ease-out both}
+  .tab:not([hidden]),#home:not([hidden]){animation:enter var(--t-quick) ease-out both}
   .modal:not([hidden]) .sheet{animation:enter var(--t-quick) ease-out both}
   @keyframes fall{from{transform:translateY(-30px)}to{transform:translateY(130px)}}
   @keyframes flash{0%,88%,100%{opacity:0}90%,94%{opacity:.4}92%{opacity:.1}}
@@ -458,7 +457,7 @@ const REDUCERS = {
   reset(s) { return REDUCERS.newDay(s); },
   sync(s, list) { s.futureMoves = list; return {}; },
   go(s, screen) { s.screen = screen; return {}; },
-  home(s) { s.screen = 'home'; return {}; },
+  home(s) { s.screen = 'home'; s.sheet = null; return {}; },
   tap() { return {}; },
   sky(s, id) { s.sky = id; s.bond.add(`${s.date}:sky`); return {}; },
   care(s, k) {
@@ -486,8 +485,11 @@ const REDUCERS = {
   }
 };
 function act(type, arg) {
-  const before = derive(state);
+  const before = derive(state), was = state.screen;
   const ctx = REDUCERS[type](state, arg) || {};
+  // One history entry per visit off Home, so the phone's back gesture returns Home instead of leaving.
+  if (was === 'home' && state.screen !== 'home') history.pushState({snz: 1}, '');
+  else if (was !== 'home' && state.screen === 'home' && history.state?.snz) history.back();
   if (ctx.cancel) cancelAll();
   const after = derive(state);
   render(after);
@@ -551,6 +553,7 @@ function effectsFor(type, b, a, c) {
 }
 
 // click events: one delegated listener
+addEventListener('popstate', () => { if (state.screen !== 'home') act('home'); });
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]');
   if (!t) return;
@@ -615,7 +618,6 @@ function build() {
     btn('reset', null, 'reset', COPY.reset));
   ui.backTop = btn('home', null, 'back back-top', COPY.back);
   $('scene-wrap').append(ui.backTop);
-  ui.backrow = el('div', {class: 'backrow'}, btn('home', null, 'back', COPY.back));
 
   // Garden
   ui.sky = {};
@@ -654,7 +656,7 @@ function build() {
       el('div', {class: 'grass-box'}, el('div', {class: 'grass-anim', 'aria-hidden': 'true'}, '🌾🌾🌾'),
         el('label', {for: 'thought'}, T.label, el('span', {}, T.optional)),
         el('textarea', {id: 'thought', placeholder: T.placeholder}),
-        el('p', {}, T.ask), kinds)), ui.backrow);
+        el('p', {}, T.ask), kinds)));
   ui.msay = el('p', {id: 'msay'}); ui.mopts = el('div', {class: 'opts'});
   ui.modal = el('div', {class: 'modal', hidden: true}, el('div', {class: 'sheet'},
     el('div', {class: 'dialog', role: 'dialog', 'aria-modal': 'true'}, el('span', {class: 'nametag'}, COPY.tag), ui.msay, ui.mopts)));
@@ -720,7 +722,7 @@ function renderSheet() {
 function render(d) {
   renderScene(d);
   const home = state.screen === 'home';
-  ui.home.hidden = !home; ui.backrow.hidden = ui.backTop.hidden = home;
+  ui.home.hidden = !home; ui.backTop.hidden = home;
   for (const [id] of COPY.menu) ui[id + '-tab'].hidden = state.screen !== id;
   for (const id in ui.sky) ui.sky[id].setAttribute('aria-pressed', d.sky === id);
   const rainy = d.sky === 'drizzly' || d.sky === 'stormy', [cap, more] = COPY.garden.stages[d.stage];
