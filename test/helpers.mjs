@@ -14,6 +14,8 @@ export function chromePath() {
   return p;
 }
 
+// The site's CSP from public/_headers, so a violation shows up as a console error in every flow.
+const CSP = fs.readFileSync(path.join(ROOT, '_headers'), 'utf8').match(/Content-Security-Policy: (.*)/)[1];
 let server;
 export async function serve() {
   server = http.createServer((req, res) => {
@@ -21,7 +23,7 @@ export async function serve() {
     if (p.endsWith('/')) p += 'index.html';
     const f = path.join(ROOT, path.normalize(p));
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' });
+    res.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream', 'content-security-policy': CSP });
     fs.createReadStream(f).pipe(res);
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));

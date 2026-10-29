@@ -8,6 +8,9 @@ import {build} from './view/build.js';
 import {$} from './view/dom.js';
 import {skipTyper} from './dialog.js';
 
+// Fonts load as media="print" so they never block first paint; switch them on once loaded (no inline onload: CSP).
+const fonts = $('fonts');
+if (fonts.sheet) fonts.media = 'all'; else fonts.addEventListener('load', () => { fonts.media = 'all'; });
 build();
 // Taps (one delegated listener) and the phone's back gesture.
 addEventListener('popstate', () => { if (state.screen !== 'home') act('home'); });

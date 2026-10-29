@@ -623,6 +623,13 @@ export const flows = [
     },
   },
   {
+    name: 'fonts switch on without an inline handler',
+    async run(page, url) {
+      await boot(page, url);
+      await page.waitForFunction(() => document.getElementById('fonts').media === 'all', { timeout: 3000 });
+    },
+  },
+  {
     name: 'phone back gesture returns Home',
     async run(page, url) {
       await boot(page, url);
