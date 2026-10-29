@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // Token check: #hex colours only in public/css/tokens.css (none in index.html, app.css, motion.css, public/js/**);
 // no digits in COPY strings (in public/js/copy.js)
-// (placeholders excepted). Prints problems (capped) and a summary; exit 1 on any.
+// (placeholders excepted); Recharge cards fit their card (title ≤ 14, small line ≤ 20, replies ≤ 2 sentences).
+// Prints problems (capped) and a summary; exit 1 on any.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { COPY } from '../public/js/copy.js';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
 const copyJs = readFileSync(join(root, 'public/js/copy.js'), 'utf8');
@@ -29,6 +31,12 @@ for (const [, , body] of copy.matchAll(/(['"`])((?:\\.|(?!\1)[^\\\n])*)\1/g)) {
   strings++;
   const s = body.replace(/\$\{[^}]*\}/g, '');
   if (/\d/.test(s)) problems.push(`digit in COPY string: ${s.slice(0, 60)}`);
+}
+// 3. Recharge cards: two columns at 320 px, so long text makes one card taller than its row. "…" is not a sentence end.
+for (const c of COPY.recharge.cards) {
+  if (c.t.length > 14) problems.push(`card ${c.k} title over 14 characters: ${c.t}`);
+  if (c.s.length > 20) problems.push(`card ${c.k} small line over 20 characters: ${c.s}`);
+  for (const r of c.r) if ((r.match(/[.!?]+(?=\s|$)/g) || []).length > 2) problems.push(`card ${c.k} reply over 2 sentences: ${r.slice(0, 60)}`);
 }
 console.log(`tokens: ${problems.length} problem(s); ${strings} COPY strings scanned`);
 for (const p of problems.slice(0, 5)) console.log(`  ${p}`);
