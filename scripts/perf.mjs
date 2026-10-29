@@ -1,4 +1,5 @@
-// Mobile Lighthouse run against public/ served with public/_headers. Prints 5 lines; exit 1 over budget.
+// Mobile Lighthouse runs against public/ served with public/_headers. Prints 4 lines (medians); exit 1 over budget.
+// PERF_RUNS=1 for a quick look.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,28 +45,36 @@ for (let i = 0; i < 100; i++) {
 }
 
 // Async spawn: the server must keep answering while Lighthouse loads the page.
-const child = spawn('npx', ['-y', 'lighthouse@12', url, '--only-categories=performance', '--form-factor=mobile', '--screenEmulation.mobile',
-  '--throttling-method=simulate', '--output=json', '--output-path=stdout', `--port=${port}`, '--quiet'],
-{ stdio: ['ignore', 'pipe', 'pipe'], env: native ? { ...process.env, NODE_OPTIONS: "--import=data:text/javascript,Object.defineProperty(process,'arch',{value:'arm64'})" } : process.env });
-let out = '', err = '';
-child.stdout.on('data', (d) => { out += d; });
-child.stderr.on('data', (d) => { err += d; });
-await new Promise((r) => child.on('close', r));
+async function lighthouse() {
+  const child = spawn('npx', ['-y', 'lighthouse@12', url, '--only-categories=performance', '--form-factor=mobile', '--screenEmulation.mobile',
+    '--throttling-method=simulate', '--output=json', '--output-path=stdout', `--port=${port}`, '--quiet'],
+  { stdio: ['ignore', 'pipe', 'pipe'], env: native ? { ...process.env, NODE_OPTIONS: "--import=data:text/javascript,Object.defineProperty(process,'arch',{value:'arm64'})" } : process.env });
+  let out = '', err = '';
+  child.stdout.on('data', (d) => { out += d; });
+  child.stderr.on('data', (d) => { err += d; });
+  await new Promise((r) => child.on('close', r));
+  try { return JSON.parse(out); } catch { console.log('perf: Lighthouse produced no JSON: ' + err.slice(0, 400)); process.exit(1); }
+}
+
+// Median of RUNS: one simulated run is noisy (±0.2 s seen), and Lantern charges every early request, so treat it
+// as a trend. LCP over WARN prints a warning only; budgets fail.
+const RUNS = Number(process.env.PERF_RUNS || 5), WARN = 1.3;
+const runs = [];
+for (let i = 0; i < RUNS; i++) {
+  const a = (await lighthouse()).audits;
+  runs.push({
+    fcp: a['first-contentful-paint'].numericValue / 1000, lcp: a['largest-contentful-paint'].numericValue / 1000,
+    cls: a['cumulative-layout-shift'].numericValue, kb: a['total-byte-weight'].numericValue / 1024,
+    req: a['network-requests'].details.items.length,
+    own: a['network-requests'].details.items.filter((r) => r.url.startsWith(url)).length, tti: (a.interactive?.numericValue ?? NaN) / 1000,
+  });
+}
 server.close();
 chrome.kill();
-
-let lhr;
-try { lhr = JSON.parse(out); } catch { console.log('perf: Lighthouse produced no JSON: ' + err.slice(0, 400)); process.exit(1); }
-
-const a = lhr.audits;
-const fcp = a['first-contentful-paint'].numericValue / 1000;
-const lcp = a['largest-contentful-paint'].numericValue / 1000;
-const cls = a['cumulative-layout-shift'].numericValue;
-const score = Math.round(lhr.categories.performance.score * 100);
-const kb = a['total-byte-weight'].numericValue / 1024;
-console.log(`FCP ${fcp.toFixed(2)} s (budget 1.5)`);
-console.log(`LCP ${lcp.toFixed(2)} s (budget 2.0)`);
-console.log(`CLS ${cls.toFixed(3)} (budget 0.1)`);
-console.log(`Performance score ${score} (budget 95)`);
-console.log(`Transfer ${kb.toFixed(1)} KB`);
-process.exit(fcp > 1.5 || lcp > 2.0 || cls > 0.1 || score < 95 ? 1 : 0);
+const med = (k) => runs.map((r) => r[k]).sort((x, y) => x - y)[Math.floor(RUNS / 2)];
+const fcp = med('fcp'), lcp = med('lcp'), cls = med('cls'), req = med('req'), own = med('own'), tti = med('tti');
+console.log(`perf: median of ${RUNS} runs (simulated Slow 4G); LCP range ${Math.min(...runs.map((r) => r.lcp)).toFixed(2)}–${Math.max(...runs.map((r) => r.lcp)).toFixed(2)} s`);
+console.log(`FCP ${fcp.toFixed(2)} s (budget 1.5) · LCP ${lcp.toFixed(2)} s (budget 2.0${lcp > WARN ? `, over the ${WARN} s warning` : ''})`);
+console.log(`first tap (TTI) ${tti.toFixed(2)} s (budget 2.5) · CLS ${cls.toFixed(3)} (budget 0.1${cls > 0.05 ? ', over the 0.05 warning' : ''})`);
+console.log(`requests: ours ${own} (budget 20), all ${req} (budget 25) · transfer ${med('kb').toFixed(1)} KB`);
+process.exit(fcp > 1.5 || lcp > 2.0 || tti > 2.5 || cls > 0.1 || own > 20 || req > 25 ? 1 : 0);
