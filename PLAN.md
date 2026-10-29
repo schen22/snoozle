@@ -5,7 +5,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Now
 
-- [ ] **Sarah:** play v1 on a phone at the Pages URL; visual sign-off.
+- [ ] **Sarah:** play v1 on a phone at the Pages URL; visual sign-off. Also check Snoozle against a light sky
+      (thicker outline + ground shadow) and the new screen layout; then decide on a darker patch behind him.
 
 ## Next
 
@@ -15,7 +16,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
       build command none, output directory `public`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph,
-      moves cap counts used moves, new "Used it" line).
+      moves cap counts used moves, new "Used it" line, screen titles cut, Back top + bottom, Moves order,
+      Thoughts opening line and hints).
 
 ## Later
 
@@ -31,6 +33,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - Accessibility pass from the spec: screen-reader labels, focus ring and focus moves, WCAG AA contrast in both themes.
   From the v1 batch review: the pop-ups need focus moved in, `inert` on the app and Escape; the tap-Snoozle and
   tap-to-skip actions are pointer-only; the live region doesn't re-announce an identical line.
+- With the keyboard open (375×380 stand-in), Snoozle's top is 129 px off screen on Moves. If it matters on a phone:
+  crop the scene's sky on sub-screens (~40 px) first, a pinned scene last (panel review, 2026-10-29).
 - CLS is 0.087 against 0.1 from the font swap: if it passes 0.1, size the fallback to Nunito (`size-adjust`).
 - `scripts/perf.mjs`: `npx -y lighthouse@12` floats minor versions, and the arm64 spoof needs Node ≥ 20.6 (only
   x64 Node on this Mac). Pin an exact version if it starts failing.
@@ -110,3 +114,10 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — Second Haiku pass (M2 tests, 49k tokens) found 5 false-green/flaky tests; fixed.
 - 2026-10-29 — Perf estimate (§5: ~1.0 s) held only after making the font CSS non-blocking; with it render-blocking,
   Lighthouse measured 2.9 s. IME composition no longer triggers Teach on Enter.
+- 2026-10-29 — **Keep Snoozle in view** (Sarah, after a UX / product / content / game-design panel): screen titles
+  and the screen-name chip cut ("Today’s garden" and "Future moves" stay); Back on the scene's corner and at the
+  end of each screen; Moves order is add box, grid, stepper, Future moves; hints stay as muted lines. Thoughts
+  opening is "Rustle, rustle… a wild thought appeared! Help us catalog and name it."; its hint keeps "Each thought
+  has its own way through."; the moves hint drops "You can carry more, but it gets heavy." (the heavy reaction says it).
+- 2026-10-29 — **Snoozle contrast**: light-mode body vs sky was 1.15:1. Outline 3 → 4 and a ground shadow; a darker
+  sky everywhere was rejected (dulls sunny, P5). A darker patch behind him waits on Sarah's look.
