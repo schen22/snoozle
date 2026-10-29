@@ -1,8 +1,7 @@
 # Technical plan
 
-Status: **draft for Sarah's review** (2026-10-28). Product spec: [Snoozle's Garden: Build Spec](https://claude.ai/artifact/9GVosVjYu739Cb4ncPLCQC)
-(the spec wins on behaviour and copy; this doc wins on how it's built). Defaults marked ★ await an answer in
-[Open questions](#10-open-questions).
+Status: **approved, all questions answered** (2026-10-29). Product spec: [Snoozle's Garden: Build Spec](https://claude.ai/artifact/9GVosVjYu739Cb4ncPLCQC)
+(the spec wins on behaviour and copy; this doc wins on how it's built). Decisions: [Open questions](#10-open-questions).
 
 ## TL;DR
 
@@ -183,7 +182,8 @@ badges or achievements).
 - **Not stored, by decision:** name (no renaming), friendship (6 lines, reachable within one day), usual, the day.
 - **Consequence:** a mid-day refresh or a phone closing the tab returns to the first-visit greeting with an empty
   day (Future moves stay). Accepted for v1; Export today ([PLAN Next](PLAN.md#next)) is how a person keeps a day.
-- `usual` resets to 4 each day, so the stepper must be re-set daily by someone whose usual differs ★ ([Q2](#10-open-questions)).
+- `usual` resets to 4 each day, so someone whose usual differs sets the stepper again each day ([Q2](#10-open-questions)).
+  Learning it from patterns is Later ([PLAN Later](PLAN.md#later)).
 - Storage failure (private mode, `file://` in some Safari builds): Future moves work for the session, silently.
   No error copy; the spec has none.
 - All writes go through one `setFuture(list)`, which saves; no other code touches storage.
@@ -346,14 +346,14 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 
 ## 10. Open questions
 
-| # | Question | Default ★ | Blocks |
+| # | Question | Default | Blocks |
 |---|---|---|---|
 | 1 | ✅ Cloudflare Pages (2026-10-29) | — | — |
-| 2 | Should `usual` (B) also be stored? It's one number and resets to 4 daily otherwise | No (Sarah: store as little as possible) | M3 |
+| 2 | ✅ `usual` is not stored; resets to 4 each day. Tracking moves by weather to learn patterns is Later (2026-10-29) | — | — |
 | 3 | ✅ A refresh wiping the day is fine for v1; Export/load covers keeping things; server state is Later (2026-10-29) | — | — |
-| 4 | "About four" in the over-limit pop-up: keep hard-coded or say B? | Keep (spec v1) | M3 |
+| 4 | ✅ Keep "about four" hard-coded (2026-10-29) | — | — |
 | 5 | ✅ Keep Snorlax/Ditto for now, page public (2026-10-29); swap before sharing the link widely | — | — |
-| 6 | A gentle support link for crisis days (spec risk) | Not in v1 | — |
+| 6 | ✅ No support link (2026-10-29) | — | — |
 | 7 | ✅ Cut the menu morph and cursor blink (2026-10-29) | — | — |
 | 8 | ✅ Public page, private repo, no Access (2026-10-29) | — | — |
 | 9 | ✅ Friendship from distinct acts only; keep all 6 lines (2026-10-29) | — | — |

@@ -5,12 +5,13 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Now
 
-- [ ] M0 · Sarah reviews [ARCHITECTURE.md](ARCHITECTURE.md) and answers its [open questions](ARCHITECTURE.md#10-open-questions).
+- [ ] M1 Shell — `index.html` from the prototype, tokens, scene, Home + menu + Back, dialog, clock,
+      `spec/copy.json`, gates (`budget.mjs`, copy check, puppeteer flows), first Pages deploy, `npm run perf`.
 
 ## Next
 
-- [ ] M1 Shell — `index.html` from the prototype, tokens, scene, Home + menu + Back, dialog, clock,
-      `spec/copy.json`, gates (`budget.mjs`, copy check, puppeteer flows), first Pages deploy, `npm run perf`.
+- [ ] **Sarah:** push the repo (no `origin` yet; `schen22/snoozle` doesn't exist on GitHub as of 2026-10-29):
+      `gh repo create schen22/snoozle --private --source=. --remote=origin --push`.
 - [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
       build command none, output directory `/`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
@@ -28,11 +29,16 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   stored thoughts). Not needed now (Sarah, 2026-10-29); Export/load covers it.
 
 - Accessibility pass from the spec: screen-reader labels, focus ring and focus moves, WCAG AA contrast in both themes.
-- Spec "Later ideas": learn the usual, big/small moves, hide the stepper, "Not sure?" sky helper.
+- **Moves by weather (pattern tracking):** keep a per-day record (`date`, `sky`, moves taught / used / saved /
+  let go) to see how many moves a day each weather actually holds, then suggest the usual from it ("We usually
+  carry about three"). Needs history across days, so it follows v2 Export/load or server state; on-device only,
+  shown as Snoozle's words, never as charts or numbers (P2). Replaces the spec's "learn the usual" idea.
+- Spec "Later ideas": big/small moves, hide the stepper, "Not sure?" sky helper.
 - Self-host fonts if `npm run perf` misses the budget ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).
 
 ## Done
 
+- 2026-10-29 — M0 Plan: all open questions answered; ARCHITECTURE approved.
 - 2026-10-28 — M0 docs: `CLAUDE.md`, `PLAN.md`, `ARCHITECTURE.md`, docs gate; spec doc renamed to Snoozle's Garden.
 
 ## Decisions
@@ -73,3 +79,5 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   reached, read-only with no code, so it can be shared safely. Thought log cap raised 60 → 100 (code ≤ ~37 KB).
 - 2026-10-29 — **Export and load moved to v2** (both exports and Load): not needed for v1. v1 = M1–M4; v1 keeps
   no thought log, and friendship resets daily.
+- 2026-10-29 — Q2: `usual` not stored, resets to 4 daily; pattern tracking of moves by weather goes to Later.
+  Q4: keep "about four". Q6: no support link.
