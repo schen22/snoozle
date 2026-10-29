@@ -61,7 +61,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 #bolt{fill:var(--bolt);opacity:0}
 .ground{fill:var(--grass)}
 .tuft{stroke:var(--grass2);stroke-width:2.5;fill:none;stroke-linecap:round}
-.b-line{stroke:var(--line);stroke-width:3}
+.b-line{stroke:var(--line);stroke-width:4}
+.b-shadow{fill:var(--scrim)}
 .b-body{fill:var(--body)}
 .b-leaf{fill:var(--leaf2)}
 .b-foot{fill:var(--leaf)}
@@ -237,6 +238,7 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
         <path class="umb-leaf" d="M110 70 Q156 26 202 70 Q191 63 179 70 Q167 63 156 70 Q145 63 133 70 Q121 63 110 70 Z"/>
         <path class="umb-rib" d="M156 68 L156 46 M156 57 L142 49 M156 57 L170 49"/>
       </g>
+      <ellipse class="b-shadow" cx="160" cy="158" rx="30" ry="5"/>
       <g id="buddy" transform="translate(160,158)" data-act="tap">
         <g id="buddy-idle"><g id="buddy-pose"><g id="buddy-react">
           <ellipse class="b-foot b-line" cx="-13" cy="-3" rx="8" ry="4.5"/>
