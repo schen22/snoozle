@@ -156,3 +156,4 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — **Content and CBT review applied** (Sarah): Thoughts buttons ≤ five words (now gated), two reframes
   ask instead of assert, Moves `introOk`/`used`/`saved`, bond lines three and four, friend reply. Kept: Snorlax/Ditto
   cloud joke, four-sentence `greeting` and `garden.intro`, no support pointer, moves cap still counts used moves.
+- 2026-10-29 — **Heavy sheet keeps re-showing** after "We’ll carry it today" on each teach or bring while over N (Sarah: leave it).
