@@ -18,6 +18,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph,
       moves cap counts used moves, new "Used it" line, screen titles cut, Back top + bottom, Moves order,
       Thoughts opening line and hints, one Back + back gesture, Moves copy said once, Recharge/Thoughts hints cut).
+- [ ] `test/flows.mjs` takes expected copy from `COPY` (load [`copy.js`](public/js/copy.js)) instead of ~15 literal
+      strings, so a copy edit doesn't break tests (2026-10-29 voice pass: 3 failures, one already stale).
 
 ## Later
 
