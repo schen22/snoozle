@@ -11,7 +11,7 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 - [ ] M1 Shell — `index.html` from the prototype, tokens, scene, Home + menu + Back, dialog, clock,
       `spec/copy.json`, gates (`budget.mjs`, copy check, puppeteer flows), first Pages deploy, `npm run perf`.
-- [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
+- [ ] **Sarah:** decide Access or public ([Q8](ARCHITECTURE.md#10-open-questions)), then connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
       build command none, output directory `/`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph).
@@ -40,3 +40,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-28 — Load time is a gated budget ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).
 - 2026-10-28 — Hosting: private GitHub repo `schen22/snoozle`, deployed by Cloudflare Pages ($0).
 - 2026-10-28 — Animations audited ([ARCHITECTURE §6](ARCHITECTURE.md#6-animation-audit)); menu morph cut ★ pending Sarah.
+- 2026-10-28 — Expert panel on ARCHITECTURE.md (10 experts; Database and API swapped for State & data and
+  Mobile web): round 1 **84.2** → round 2 **90.7**. Fixed: DOM helper + static skeletons (no `innerHTML`,
+  focus kept), storage validation / `storage` event / unknown-version guard, public-site warning + `_headers`
+  CSP + Access option, zero-console-error gate, `copy.json` placeholder rule, iOS keyboard and tab-discard risk.
+  Lowest after round 2: UX 88, because a refresh wipes the day (accepted risk, [Q3](ARCHITECTURE.md#10-open-questions)).
+- 2026-10-28 — Perf check is local `npx lighthouse`, not PageSpeed Insights (keyless API hit a shared daily quota).

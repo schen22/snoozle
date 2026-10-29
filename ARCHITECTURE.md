@@ -62,11 +62,13 @@ Sections in this order, each behind a `// ── NAME ──` comment so an agen
 | `STORE` | `loadFuture()` / `saveFuture()` | Wrapped in try/catch; app works if storage throws |
 | `CLOCK` | Date check on load, `visibilitychange`, every 60 s | New date → `act('newDay')` |
 | `ACT` | One function per action in the spec tables | Returns nothing; ends with `render()` |
-| `RENDER` | Scene, backpack, friendship line, panel per screen | User text via `textContent` only, never `innerHTML` |
+| `RENDER` | Scene, backpack, friendship line, panel per screen | Built with a 10-line `el(tag, attrs, ...kids)` helper: user text becomes text nodes, never `innerHTML`. Each screen's skeleton (headings, inputs) is built once; `render()` replaces only its lists and labels, so a typed draft and keyboard focus survive every action |
 | `FX` | Hop, hearts, ✨, phew, strain, menu morph | Respects `prefers-reduced-motion` (cheap to keep; spec behaviour) |
 | `DIALOG` | Typer (18 ms/char), tap to skip, `▾` | One typer at a time; a new line cancels the old |
 
 Events: one delegated `click` listener reads `data-act="…"` and `data-arg="…"`; Enter in the move input = Teach.
+The move input calls `scrollIntoView({block: "center"})` on focus so the iPhone keyboard doesn't hide it. With
+renaming gone, no bottom sheet holds an input. Avoid `100vh`, because iOS toolbars make it taller than the screen.
 
 ## 3. State
 
@@ -82,7 +84,14 @@ Events: one delegated `click` listener reads `data-act="…"` and `data-arg="…
 - `usual` resets to 4 each day, so the stepper must be re-set daily by someone whose usual differs ★ ([Q2](#10-open-questions)).
 - Storage failure (private mode, `file://` in some Safari builds): Future moves work for the session, silently.
   No error copy; the spec has none.
-- Schema version `v` lets a later field be added without breaking stored data; an unknown `v` is ignored, not erased.
+- All writes go through one `setFuture(list)`, which saves; no other code touches storage.
+- Reading validates: an array of strings, each trimmed to 40 chars, at most 50 kept. Anything else reads as empty.
+- Schema version `v` lets a later field be added. An unknown `v` (a newer build) is neither read nor overwritten.
+- Two open tabs: the `storage` event reloads `futureMoves` in the other tab, so neither overwrites the other's save.
+- "Reset prototype" clears the day only, as the spec says. Future moves are not part of the day.
+- **Top UX risk:** iPhone Safari discards background tabs under memory pressure. A person who teaches moves in the
+  morning may find an empty day in the afternoon (Future moves survive). If that shows up in use, the cheapest fix
+  is the spec's own: mirror the day under a date key, cleared at midnight (~10 lines). Sarah's call ([Q3](#10-open-questions)).
 
 ## 4. Hosting and cost
 
@@ -95,6 +104,22 @@ Events: one delegated `click` listener reads `data-act="…"` and `data-arg="…
 | Maintenance | No dependencies at runtime; dev-only `puppeteer-core` for the gate | ~0 h/month |
 
 Preview deploys: each branch gets its own `*.pages.dev` URL, so a change can be checked on a phone before merge.
+Rollback: Pages keeps every deployment; "Rollback" in the dashboard restores one in seconds.
+
+**The site is public.** A private repo hides the code, not the page: anyone with the `pages.dev` URL can open it,
+and search engines can find it. To make the page itself private, put Cloudflare Access in front (free up to 50
+users, email one-time code, no code change) ★ ([Q8](#10-open-questions)). Either way, ship a `_headers` file:
+
+```text
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+```
+
+`'unsafe-inline'` is the price of one self-contained file; the rule that user text is never parsed as HTML
+([§2](#2-code-layout-inside-indexhtml)) is what actually prevents injection. The policy still blocks any network
+call the spec doesn't allow.
 
 ## 5. Load time
 
@@ -103,8 +128,8 @@ Budget, checked as computed values, never by eye:
 | Metric | Budget | Measured / estimated | How checked |
 |---|---|---|---|
 | `index.html` brotli | ≤ 20 KB | prototype 13.0 KB (46.4 KB raw, 14.8 KB gzip) | `gate:fast`: `scripts/budget.mjs` compresses and compares |
-| Total transfer, first load | ≤ 70 KB | ~13 + 1.6 (font CSS) + 39.2 (Nunito, one variable file for 400/600/800) + 4.7 (Press Start 2P) ≈ **59 KB** | Lighthouse on the Pages URL |
-| FCP, Slow 4G | ≤ 1.5 s | ~1.0 s (below) | Lighthouse mobile, `npm run perf <url>` |
+| Total transfer, first load | ≤ 70 KB | ~13 + 1.6 (font CSS) + 39.2 (Nunito, one variable file for 400/600/800) + 4.7 (Press Start 2P) ≈ **59 KB** | `npm run perf` |
+| FCP, Slow 4G | ≤ 1.5 s | ~1.0 s (below) | `npm run perf` |
 | LCP, Slow 4G | ≤ 2.0 s | ~1.0–1.3 s | same |
 | CLS | ≤ 0.1 | unknown: font swap may shift the dialog | same |
 | Lighthouse performance | ≥ 95 | — | same |
@@ -156,9 +181,18 @@ waits on an animation.
 
 | Command | Runs | Time |
 |---|---|---|
-| `npm run gate:fast` | Docs links (`check-docs.mjs`) · brotli budget · every `spec/copy.json` string present in `index.html` · no hex colour outside `TOKENS` · no digits in rendered copy except N, B and the stepper | < 2 s |
-| `npm run gate` | `gate:fast` + puppeteer-core with installed Chrome at 320, 390, 460 px: no horizontal scroll, tap targets ≥ 44 px, the spec's acceptance criteria as scripted flows (menu → screen → Back, skies, plant stages, teach past N, save/let go, Future moves survive reload, midnight reset with a faked clock) | < 30 s |
-| `npm run perf <url>` | Lighthouse mobile on a deployed URL; prints FCP, LCP, CLS, score | ~30 s, needs network; run at each milestone |
+| `npm run gate:fast` | Docs links (`check-docs.mjs`) · brotli budget · every `spec/copy.json` string present in `index.html` · no hex colour outside `TOKENS` · no digits in `COPY` except N, B and the stepper | < 2 s |
+| `npm run gate` | `gate:fast` + puppeteer-core with installed Chrome at 320, 390, 460 px: no horizontal scroll, tap targets ≥ 44 px, **zero `pageerror` or console errors**, the spec's acceptance criteria as scripted flows (menu → screen → Back, skies, plant stages, teach past N, save/let go, Future moves survive reload, a corrupt `snoozle:v1` reads as empty, midnight reset with a faked clock) | < 30 s |
+| `npm run perf` | `npx lighthouse` (mobile preset, simulated Slow 4G) with the installed Chrome against the local server; prints FCP, LCP, CLS, score, bytes. Fonts load from Google for real | ~30 s, needs network for fonts; run at each milestone |
+
+`spec/copy.json` is extracted from the spec once, in M1, as `{key: string}`. A string with a placeholder
+(`{move}`, N, B, `{sky}`) is stored as its fixed fragments, and each fragment must appear. When the spec's copy
+changes, update `copy.json` in the same commit as `index.html`.
+
+Not PageSpeed Insights: tested 2026-10-28, keyless calls fail on a shared daily quota, and it can't reach a page behind Access.
+
+A runtime error stops the page, and there's no logging by design (no analytics). The zero-console-error gate is
+what catches errors, so every scripted flow counts.
 
 Each prints ≈ 5 lines. Reuse `openAt` and `VIEWPORTS` from sarahs-corner's `test/helpers.js` (serve over HTTP,
 installed Chrome, no browser download). No screenshots in helpers; visual sign-off is Sarah's.
@@ -190,8 +224,9 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 |---|---|---|---|
 | 1 | Cloudflare Pages or Workers static assets? (food-planner chose Workers as Cloudflare's path for new projects) | Pages: Git-connect with no config | M1 deploy |
 | 2 | Should `usual` (B) also be stored? It's one number and resets to 4 daily otherwise | No (Sarah: store as little as possible) | M3 |
-| 3 | Mid-day refresh wipes the day: acceptable for v1? | Yes | M1 |
+| 3 | Mid-day refresh or iPhone tab discard wipes the day ([§3](#3-state)): acceptable for v1? | Yes; revisit after a week of use | M1 |
 | 4 | "About four" in the over-limit pop-up: keep hard-coded or say B? | Keep (spec v1) | M3 |
-| 5 | Snorlax/Ditto in the cloudy line: the site is private, so keep? | Keep while private | Going public |
+| 5 | Snorlax/Ditto in the cloudy line: keep? Only safe while the page is private ([Q8](#10-open-questions)) | Keep if Access is on; else the spec's "sleepy giant / blob" line | M2 |
 | 6 | A gentle support link for crisis days (spec risk) | Not in v1 | — |
 | 7 | Cut the menu morph and cursor blink (spec "Selecting an option", [§6](#6-animation-audit))? | Yes: instant swap + 150 ms fade | M1 |
+| 8 | Should the page itself be private (Cloudflare Access, [§4](#4-hosting-and-cost)) or public by URL? | Private with Access | M1 deploy |
