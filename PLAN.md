@@ -5,8 +5,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Now
 
-- [ ] M2 Care — Garden (skies, rain, leaf shelter, plant stages) and Recharge Center to spec; flows for their
-      acceptance criteria.
+- [ ] M3 Moves — Move tutor, backpack, softened strain, pop-ups, Future moves; first the moves-cap fix (load
+      counts used moves, see Decisions).
 - [ ] `npm run perf` (Lighthouse) — not built yet; first numbers due with M2.
 
 ## Next
@@ -16,7 +16,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
       build command none, output directory `public`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
-- [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph).
+- [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph,
+      moves cap counts used moves, new "Used it" line).
 
 ## Later
 
@@ -39,6 +40,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Done
 
+- 2026-10-29 — M2 Care: Garden and Recharge already matched the spec; 5 flows added and hardened after review
+  (fresh browser context per flow, exact asserts, polling instead of sleeps). Gate: flows 12/12.
 - 2026-10-29 — M1 Shell: `public/index.html` restructured to the architecture (807 lines, 14.3 KB brotli);
   `npm run gate` = docs, budget, copy 168/168, sprites 54/54, tokens, browser flows 7/7.
 - 2026-10-29 — M0 Plan: all open questions answered; ARCHITECTURE approved.
@@ -91,3 +94,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   commands only. Project `.claude/settings.json` exemption: Sarah to create (Claude's write was blocked).
 - 2026-10-29 — First Haiku fresh-eyes pass (M1): 93k tokens; found 1 rule break Gate 1 missed (thought friendship
   farmable) + 1 minor. Evidence for the setup audit.
+- 2026-10-29 — **Moves cap counts used moves** (Sarah, after a game-design review): today's load = used + unfinished;
+  only Save for later / Let go lighten it, closing the "do one, add one" loophole. Strain when load > N and a move is
+  unfinished; pop-up and pink borders use load; bundles still show unfinished only. The spec and prototype counted
+  unfinished only, so this is a spec change, not a code bug. "Used it" line 1 becomes "Nice! That one’s done. Let’s
+  let it count." (line 2 unchanged).
+- 2026-10-29 — Second Haiku pass (M2 tests, 49k tokens) found 5 false-green/flaky tests; fixed.

@@ -100,7 +100,8 @@ can't drift.
 | `stage` | seed 0 · sprout 1–2 · bud 3–4 · bloom ≥ 5 | — |
 | `N` | spec table from `sky` and `usual` (no sky → B) | — |
 | `unfinished` | moves not used | — |
-| `heavy` | `unfinished > N` | Strain on/off, pink borders |
+| `load` | moves taught today and still in the day: used + unfinished (saved and let-go moves leave it) | — |
+| `heavy` | `load > N` and `unfinished ≥ 1` (decided 2026-10-29: a used move still counts) | Strain on/off; pink borders on day positions past N; the over-limit pop-up |
 | `friendship` | size of `bond` | A counter that tapping can farm |
 | `line` | the highest friendship line reached | — |
 
