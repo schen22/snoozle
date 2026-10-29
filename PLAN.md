@@ -5,9 +5,7 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Now
 
-- [ ] M3 Moves — Move tutor, backpack, softened strain, pop-ups, Future moves; first the moves-cap fix (load
-      counts used moves, see Decisions).
-- [ ] `npm run perf` (Lighthouse) — not built yet; first numbers due with M2.
+- [ ] **Sarah:** play v1 on a phone at the Pages URL; visual sign-off.
 
 ## Next
 
@@ -31,6 +29,11 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   stored thoughts). Not needed now (Sarah, 2026-10-29); Export/load covers it.
 
 - Accessibility pass from the spec: screen-reader labels, focus ring and focus moves, WCAG AA contrast in both themes.
+  From the v1 batch review: the pop-ups need focus moved in, `inert` on the app and Escape; the tap-Snoozle and
+  tap-to-skip actions are pointer-only; the live region doesn't re-announce an identical line.
+- CLS is 0.087 against 0.1 from the font swap: if it passes 0.1, size the fallback to Nunito (`size-adjust`).
+- `scripts/perf.mjs`: `npx -y lighthouse@12` floats minor versions, and the arm64 spoof needs Node ≥ 20.6 (only
+  x64 Node on this Mac). Pin an exact version if it starts failing.
 - **Moves by weather (pattern tracking):** keep a per-day record (`date`, `sky`, moves taught / used / saved /
   let go) to see how many moves a day each weather actually holds, then suggest the usual from it ("We usually
   carry about three"). Needs history across days, so it follows v2 Export/load or server state; on-device only,
@@ -40,6 +43,11 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Done
 
+- 2026-10-29 — **v1 done** (M1–M4). `npm run gate`: copy 168/168, sprites 54/54, flows 29/29, 14.3 KB brotli.
+  `npm run perf` ×3: FCP 0.94–0.98 s, LCP 0.94–1.01 s, CLS 0.087, score 98. Gate 2 Sonnet batch review: SHIP.
+- 2026-10-29 — M4 Thoughts + acceptance: all 7 kinds, screen routes, tap Snoozle, reduced motion, no digits,
+  320 px with pop-ups, Reset. No page fixes needed; perf fixed by non-blocking font CSS.
+- 2026-10-29 — M3 Moves: moves cap counts used moves; "phew~" never dropped; 6 flows.
 - 2026-10-29 — M2 Care: Garden and Recharge already matched the spec; 5 flows added and hardened after review
   (fresh browser context per flow, exact asserts, polling instead of sleeps). Gate: flows 12/12.
 - 2026-10-29 — M1 Shell: `public/index.html` restructured to the architecture (807 lines, 14.3 KB brotli);
@@ -100,3 +108,5 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   unfinished only, so this is a spec change, not a code bug. "Used it" line 1 becomes "Nice! That one’s done. Let’s
   let it count." (line 2 unchanged).
 - 2026-10-29 — Second Haiku pass (M2 tests, 49k tokens) found 5 false-green/flaky tests; fixed.
+- 2026-10-29 — Perf estimate (§5: ~1.0 s) held only after making the font CSS non-blocking; with it render-blocking,
+  Lighthouse measured 2.9 s. IME composition no longer triggers Teach on Enter.
