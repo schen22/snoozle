@@ -28,7 +28,7 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 ## Constraints
 
-- One `index.html`, inline CSS + vanilla JS. No framework, build, backend, accounts, analytics, or network calls
+- One `public/index.html` (the only page served, with `public/_headers`), inline CSS + vanilla JS. No framework, build, backend, accounts, analytics, or network calls
   beyond Google Fonts. No new dependency without a named need (dev-only `puppeteer-core` is the one allowed).
 - Stored: Future moves only (`localStorage` `snoozle:v1`). Nothing else persists in v1; export and load are v2 ([ARCHITECTURE: Export and load](ARCHITECTURE.md#export-and-load)).
 - Load: ≤ 20 KB brotli HTML, LCP ≤ 2.0 s on Slow 4G ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).

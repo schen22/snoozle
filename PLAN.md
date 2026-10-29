@@ -13,7 +13,7 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - [ ] **Sarah:** push the repo (no `origin` yet; `schen22/snoozle` doesn't exist on GitHub as of 2026-10-29):
       `gh repo create schen22/snoozle --private --source=. --remote=origin --push`.
 - [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
-      build command none, output directory `/`).
+      build command none, output directory `public`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph).
 

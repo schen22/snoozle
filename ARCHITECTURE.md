@@ -225,7 +225,7 @@ call storage directly. Every one of those is ruled out above, and the gate's flo
 | Item | Choice | Cost |
 |---|---|---|
 | Repo | GitHub `schen22/snoozle`, private | $0 |
-| Host | Cloudflare Pages, Git integration, no build command, output directory `/` | $0 (500 builds/month on the free plan; we'll use < 30) |
+| Host | Cloudflare Pages, Git integration, no build command, output directory `public` (only `public/index.html` and `public/_headers` are served; docs, `reference/` and `scripts/` stay unpublished) | $0 (500 builds/month on the free plan; we'll use < 30) |
 | Domain | `snoozle.pages.dev` (or the next free subdomain) | $0 |
 | Fonts | Google Fonts (spec) | $0; sends the visitor's IP to Google |
 | Maintenance | No dependencies at runtime; dev-only `puppeteer-core` for the gate | ~0 h/month |
@@ -351,7 +351,7 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | Milestone | Scope | Done when |
 |---|---|---|
 | M0 Plan | `CLAUDE.md`, `PLAN.md`, this doc, expert review, repo | Sarah approves this doc |
-| M1 Shell | `index.html` from the prototype; tokens; scene + Snoozle sprites kept as drawn (sprite check in the gate); Home, menu, Back; dialog typer; clock; `spec/copy.json`; gates; Pages deploy | Home works on a phone at the Pages URL; gate passes; perf printed |
+| M1 Shell | `public/index.html` from the prototype; `public/_headers`; tokens; scene + Snoozle sprites kept as drawn (sprite check in the gate); Home, menu, Back; dialog typer; clock; `spec/copy.json`; gates; Pages deploy | Home works on a phone at the Pages URL; gate passes; perf printed |
 | M2 Care | Garden (skies, rain, leaf shelter, plant stages) and Recharge Center; friendship line | Their acceptance criteria pass in `gate` |
 | M3 Moves | Move tutor, backpack and strain, pop-ups, Future moves + storage | Teach past N never blocks; Future moves survive reload |
 | M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; thoughts log; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
