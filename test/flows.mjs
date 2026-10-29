@@ -623,6 +623,24 @@ export const flows = [
     },
   },
   {
+    name: 'Snoozle\u2019s face stands out from his body in light and dark mode',
+    async run(page, url) {
+      // Dark mode once turned the face light on a cream body (2026-10-29): compare the rendered fills, WCAG ratio.
+      for (const scheme of ['light', 'dark']) {
+        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
+        await boot(page, url);
+        const ratio = await page.evaluate(() => {
+          const rgb = (sel) => getComputedStyle(document.querySelector(sel)).fill.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+          const lum = ([r, g, b]) => [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; })
+            .reduce((t, v, i) => t + v * [0.2126, 0.7152, 0.0722][i], 0);
+          const [a, b] = [lum(rgb('.eyes-open circle')), lum(rgb('.b-body'))].sort((x, y) => y - x);
+          return (a + 0.05) / (b + 0.05);
+        });
+        assert(ratio >= 4.5, `${scheme}: face vs body contrast ${ratio.toFixed(2)} < 4.5`);
+      }
+    },
+  },
+  {
     name: 'fonts switch on without an inline handler',
     async run(page, url) {
       await boot(page, url);
