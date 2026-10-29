@@ -4,7 +4,7 @@ import {COPY} from './copy.js';
 // Facts only. Everything else (water, stage, N, heavy, friendship, line) is derived on every render.
 export const SKY = {sunny: {water: 1, anim: 'a-bounce'}, cloudy: {water: 1, anim: 'a-sway'}, drizzly: {water: 2, anim: 'a-droop'}, stormy: {water: 2, anim: 'a-nap'}};
 const STAGE_AT = [0, 1, 3, 5];         // seed, sprout, bud, bloom: water needed
-const BOND_AT = [0, 2, 6, 12, 20, 35]; // friendship needed for each line in COPY.bond
+const BOND_AT = [0, 2, 4, 6, 8, 10]; // friendship needed for each line in COPY.bond (a day reaches at most 14)
 export const freshDay = date => ({date, sky: null, care: 0, cared: new Map(), moves: [], seq: 0, bond: new Set(), usual: 4, screen: 'home', sheet: null});
 export const state = {...freshDay(''), futureMoves: []};
 const nFor = (sky, b) => sky === 'drizzly' ? Math.max(1, Math.ceil(b * 0.75)) : sky === 'stormy' ? Math.max(1, Math.round(b / 2)) : b;

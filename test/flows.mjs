@@ -51,7 +51,6 @@ const STAGES = [
   ['A bud is forming.', 'Almost there. No rush.'],
   ['In full bloom.', 'Look what today grew.'],
 ];
-const BOND = ['Snoozle is peeking at you from behind a leaf.', 'Snoozle is warming up to you.', 'Snoozle hums a little when you’re around.'];
 const CARDS = {
   food: ['We’re munching side by side. Best picnic ever.', 'Big slurp! My leaves just perked right up.'],
   rest: ['I’m curling up next to you. We recharge together.', 'Shh… nap time. The garden grows while we sleep.'],
@@ -86,7 +85,7 @@ const THOUGHTS = [
     ['Just sit with it a sec', 'Okay. I’ll sit here with you. No fixing needed.']]],
 ];
 const caption = (page) => page.$eval('.today-garden p', (n) => n.textContent);
-const bondIdx = async (page) => BOND.indexOf(await page.$eval('.bond', (n) => n.textContent.trim()));
+const bondIdx = (page) => page.evaluate(() => window.__snoozle.COPY.bond.indexOf(document.querySelector('.bond').textContent.trim()));
 const pickSky = (page, s) => tap(page, `button[data-act=sky][data-arg=${s}]`);
 const careTap = (page, k) => tap(page, `button[data-act=care][data-arg=${k}]`);
 
@@ -261,15 +260,15 @@ export const flows = [
       await goto(page, 'recharge');
       await careTap(page, 'food');
       assert((await bondIdx(page)) === 1, 'friendship 2 should be "warming up"');
-      // [card, expected line index]: friendship 2,2,3,4,4,5,6
-      for (const [k, want] of [['food', 1], ['move', 1], ['rest', 1], ['rest', 1], ['friend', 1], ['pit', 2]]) {
+      // [card, expected line index]: friendship 2,3,4,4,5,6
+      for (const [k, want] of [['food', 1], ['move', 1], ['rest', 2], ['rest', 2], ['friend', 2], ['pit', 3]]) {
         await careTap(page, k);
         const i = await bondIdx(page);
         assert(i === want, `after ${k}: line ${i}, wanted ${want}`);
       }
       await goto(page, 'garden');
       await pickSky(page, 'stormy');
-      assert((await bondIdx(page)) === 2, 'line changed after a repeat sky pick');
+      assert((await bondIdx(page)) === 3, 'line changed after a repeat sky pick');
     },
   },
   {
