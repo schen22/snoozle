@@ -130,3 +130,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — **Copy in one file**: `public/js/copy.js` (classic script, global `COPY`), grouped by screen with a
   "when it shows" note per line. It is the source of truth; `spec/copy.json` and `check-copy` retired. Budget sums
   `index.html` + `public/js/*.js` (15.6 KB brotli). CSP `script-src` adds `'self'`.
+- 2026-10-29 — **Three voices in the copy** (game design / UX review): Snoozle in first person ("we" always includes
+  you), narrator in third person for the bond line and plant captions, choice buttons in the user's voice. Rules sit in
+  the [`copy.js`](public/js/copy.js) header. 16 lines changed to fit: the carry exchange becomes "we", the Future moves
+  hint drops "sunnier", "70%" becomes "mostly done" (digit exception removed), and the Thoughts opening becomes
+  "Let’s name it together." and "Used it" line 1 becomes "…My leaves did a little wiggle." (both reverse earlier
+  decisions). "Recharge Center" pun kept.
