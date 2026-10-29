@@ -1,0 +1,9 @@
+{
+  "name": "snoozle",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gate:fast": "node scripts/check-docs.mjs",
+    "gate": "npm run gate:fast"
+  }
+}
