@@ -39,6 +39,19 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 - Not in v1: renaming, the spec's accessibility section ([PLAN Later](PLAN.md#later)).
 - No screenshots in helpers; compare computed values. Visual sign-off is Sarah's.
 
+## Working rules
+
+- Always hold a You Aren't Gonna Need It mentality. Do not overengineer. Never expand scope without permission.
+- Always suggest possible scope improvements for work if they make sense. All work must be justifiable.
+- Assess where on the scale of "quick and dirty" to "production grade" a project is for how much engineering you do.
+  Snoozle today: a personal v1 on a public URL with no user data on the server. That puts it nearer quick than
+  production: gates and the architecture rules, but no extra abstraction, config or tests beyond the spec's
+  acceptance criteria.
+- Always spin up a sub agent with minimal context using a cheap model, with the job of reviewing your changes, to
+  sus out possible problems with fresh eyes. Brief it with the diff and the rules it touches only (no history),
+  `model: "haiku"`, read-only, blockers only, ≤ 10 lines. This applies to every change, and it overrides the
+  `delegate` skill's "separate reviewer only for risky tasks".
+
 ## Lessons
 
 <!-- Dated, append-only. Sort with the ladder at end of session. -->
