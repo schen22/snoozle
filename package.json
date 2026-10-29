@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "gate:fast": "node scripts/check-docs.mjs",
-    "gate": "npm run gate:fast"
+    "gate": "npm run gate:fast && node test/flows.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^25.16.0"
