@@ -61,7 +61,7 @@ Sections in this order, each behind a `// ── NAME ──` comment so an agen
 | `TOKENS` (CSS) | Spec colour tokens, light + `prefers-color-scheme: dark` | Every colour is a variable; no hex outside this block |
 | `COPY` | Every user-visible string from the spec, as one object | Strings appear nowhere else in the script; the gate checks them against `spec/copy.json` |
 | `STATE` | `newDay()` defaults + `day` object + `futureMoves` | Only `act()` mutates |
-| `STORE` | `loadFuture()` / `saveFuture()` | Wrapped in try/catch; app works if storage throws |
+| `STORE` | `store.load()` → lasting facts, `store.save(lasting)` | The only code that knows where data lives (v1: `localStorage`). `load` runs once at boot and may be async; `save` is fire-and-forget, so `act()` never waits on storage. Wrapped in try/catch; app works if storage throws |
 | `CLOCK` | Date check on load, `visibilitychange`, every 60 s | New date → `act('newDay')` |
 | `ACT` | One function per action in the spec tables | Returns nothing; ends with `render()` |
 | `RENDER` | Scene, backpack, friendship line, panel per screen | Built with a 10-line `el(tag, attrs, ...kids)` helper: user text becomes text nodes, never `innerHTML`. Each screen's skeleton (headings, inputs) is built once; `render()` replaces only its lists and labels, so a typed draft and keyboard focus survive every action |
@@ -104,8 +104,9 @@ can't drift.
 | `friendship` | size of `bond` | A counter that tapping can farm |
 | `line` | the highest friendship line reached | — |
 
-`bond` is a set of distinct acts: `sky` (first pick of the day), `care:<card>` (first tap of each card), and
-`thought:<n>` (each thought named). A day reaches at most 1 + 8 + thoughts. Repeat taps still water the plant and
+`bond` is a set of distinct acts, each keyed with its date: `<date>:sky` (first pick of the day),
+`<date>:care:<card>` (first tap of each card), and `<date>:thought:<n>` (each thought named). v1 only ever holds
+today's keys, but the date prefix means days from a loaded code or a server merge by set union, with no migration. A day reaches at most 1 + 8 + thoughts. Repeat taps still water the plant and
 get Snoozle's alternating replies (the spec's soft limits), but they don't buy friendship. This needs Sarah's
 yes, since the spec says every tap adds 1 ([Q9](#10-open-questions)).
 
@@ -126,7 +127,8 @@ act(type, arg):
   `after.line > before.line`. The gate tests it without a browser.
 - `lineFor` picks one line per action. A stage-up appends " Look, our plant grew!". A thought option that opens
   another screen keeps its own line, so the screen's intro line is skipped for that navigation (`go(screen, {quiet:true})`).
-- Moves carry an `id` from a counter, so duplicates ("walk" twice) stay distinct in "Which one can wait?".
+- Moves carry an `id` of `<date>-<n>` (a per-day counter), so duplicates ("walk" twice) stay distinct in "Which one
+  can wait?", and ids stay unique across days once history is kept.
 - `newDay` and "Reset prototype": close any sheet, cancel the typer and every running animation
   (`document.getAnimations()`), then reset facts and greet.
 
@@ -179,6 +181,8 @@ badges or achievements).
   The Export sheet says so in one line ([Q11](#10-open-questions)).
 - Copy for both sheets is new (the spec has none). Drafts go to Sarah before M5 ([Q11](#10-open-questions)).
 
+### Storage rules
+
 - **Not stored, by decision:** name (no renaming), friendship (6 lines, reachable within one day), usual, the day.
 - **Consequence:** a mid-day refresh or a phone closing the tab returns to the first-visit greeting with an empty
   day (Future moves stay). Accepted for v1; Export today ([PLAN Next](PLAN.md#next)) is how a person keeps a day.
@@ -194,6 +198,27 @@ badges or achievements).
 - **Top UX risk:** iPhone Safari discards background tabs under memory pressure. A person who teaches moves in the
   morning may find an empty day in the afternoon (Future moves survive). If that shows up in use, the cheapest fix
   is the spec's own: mirror the day under a date key, cleared at midnight (~10 lines). Sarah's call ([Q3](#10-open-questions)).
+
+### Growth path
+
+Three later features, and the seam in v1 that each one plugs into. None needs a rewrite. Claim to refute: "each
+is additive". It would be wrong if v1 stored derived values, mutated state outside `act()`, or let other code
+call storage directly. Every one of those is ruled out above, and the gate's flows exercise `act()` alone.
+
+| Feature | Seam in v1 | What gets added | Est. lines |
+|---|---|---|---|
+| History across days (moves by weather, [PLAN Later](PLAN.md#later)) | `act('newDay')` is the one place a day ends; state is facts only | Before resetting, `newDay` appends a day summary `{date, sky, taught, used, saved, letGo}` to `history` (a lasting fact, capped at ~365 days ≈ 30 KB). Patterns are derived values, like `N` | ~40 |
+| Export and load (v2, [§3](#export-and-load)) | Facts-only state; `v` + `migrate`; text nodes for user text | `toCode` / `fromCode` from dragons, the two Markdown renderers, two sheets. Load = validate → `migrate` → set lasting facts → `render()` | ~200 |
+| Server storage / user sessions | `STORE` is the only storage code, with async `load` and fire-and-forget `save` | A second `STORE` that `fetch`es a Pages Function (same project, D1 binding) behind Cloudflare Access or a login. Sync is set union for `bond` and keyed by id/date for the rest. CSP gains `connect-src 'self'`; CLAUDE.md's "no network calls" rule changes by decision | ~80 client + ~120 server |
+
+- **Pages doesn't block server storage:** Pages Functions run as Workers and bind to D1, so the API can live in
+  the same project. Moving to Workers static assets later is a config change, not a code change.
+- **File size:** the prototype is 789 lines; v1 is estimated at ~1,100–1,300, and v2 + history adds ~240, which
+  stays under the 1,800-line split point ([§1](#1-overview)). Server sync would pass it, so that's when `STORE` and
+  the export code move to their own files, which needs a build or plain `<script src>`. It also ends opening from
+  `file://` with storage working.
+- **Stays fixed:** P2 still applies to history. Patterns come out as Snoozle's words ("We usually carry about
+  three on cloudy days"), never charts or counts.
 
 ## 4. Hosting and cost
 
