@@ -145,19 +145,28 @@ Dispatch Code (`doodles/dragons/public/engine.js`, `toCode` / `fromCode` / `migr
 
 `thoughts` is a new fact: `{date, time, kind, choice, text?}` per thought named (text only when typed, ≤ 200 chars).
 The spec's v1 rule "typed thoughts are not kept" changes to "kept in memory for the day and in exports only".
-The log keeps the newest 60 thoughts, so a code stays under ~8 KB.
+The log keeps the newest 100 thoughts. Size: a thought is ~120 bytes of JSON typically, ~280 with 200 typed chars,
+so the log is ~12–28 KB, and base64 adds a third: a code is ~16 KB typically, ~37 KB at most. Notes apps and the
+clipboard handle that; a code past 50 KB would mean the cap is wrong.
 
 **Format:** `SNZ1.<fnv32 checksum>.<base64 UTF-8 JSON>`, as in dragons. The checksum catches a code truncated by a
 notes app. A load validates with the same rules as storage ([§3](#3-state): types, lengths, caps), runs
 `migrate(v)`, and renders text as text nodes. Anything invalid gives one gentle line and changes nothing.
 
-**One export, two uses:** the exported text is readable Markdown (the spec's "Export today" moments: sky, care,
-plant stage, friendship line, moves used/saved/let go, thoughts) with the code on its last line. Load accepts the
-whole text pasted back and finds the `SNZ1.` code in it. So the person's notes are both a diary and a backup.
+**Two exports, both plain Markdown** (Sarah, 2026-10-29):
+
+| Export | Holds | Code? | For |
+|---|---|---|---|
+| **Today** | The spec's "Export today" moments: sky, care, plant stage, friendship line, moves used/saved/let go, today's thoughts | Yes, `SNZ1.` code on its last line | Daily note: a diary entry and a backup in one. Load accepts the whole text pasted back and finds the code in it |
+| **Thoughts and friendship** | Every thought in the log, grouped by date (newest first): time, kind, the way through chosen, typed text if any. Then the friendship line reached with Snoozle, as its words (no number, P2) | No | Looking back, or sharing with someone (a friend, a therapist) without handing over restore data |
+
+The second export is read-only by design, so it can be shared without the code. It shows only the current
+friendship line, not a dated list of lines reached, because that list would read as achievements (spec: no
+badges or achievements).
 
 | Control | Where | Does |
 |---|---|---|
-| "Export" link | Home, beside Reset prototype | Opens a bottom sheet: **Share** (`navigator.share`, phones) · **Copy** (clipboard) · **Download** (`.md` file, desktop fallback) |
+| "Export" link | Home, beside Reset prototype | Opens a bottom sheet: pick **Today** or **Thoughts and friendship**, then **Share** (`navigator.share`, phones) · **Copy** (clipboard) · **Download** (`.md` file, desktop fallback) |
 | "Load" link | Same row | Bottom sheet with a paste box + **Load**. Confirms in Snoozle's voice what came back |
 
 - Friendship across days: with a loaded code, `bond` keeps earlier days' acts, so the higher lines ("every kind of
@@ -255,7 +264,7 @@ prototype.
 | Plant pop + ✨ | 1 keyframe, class reset | High: the reward for care | Keep |
 | Floating 💗 💤 💞 💨 "phew~" | One spawn helper + 1.6 s removal timer | Medium | Keep; one `float(emoji, at)` helper, ≤ 4 at once |
 | Backpack bundle pop | 1 keyframe | Medium | Keep |
-| Strain (face swap + 0.35 s linear tremble, infinite) | 1 keyframe + 3 SVG parts shown | High for the face; the endless fast shaking reads as agitation to a burnt-out audience | **Change ★**: face swap stays while heavy; a 1.2 s tremble when crossing over N; then a slow sag loop (2.4 s ease-in-out) |
+| Strain (face swap + 0.35 s linear tremble, infinite) | 1 keyframe + 3 SVG parts shown | High for the face; the endless fast shaking reads as agitation to a burnt-out audience | **Change** (decided 2026-10-29): face swap stays while heavy; a 1.2 s tremble when crossing over N; then a slow sag loop (2.4 s ease-in-out) |
 | Relief stretch | 1 keyframe | High: "doing less earns the warmest reaction" | Keep |
 | Sit-down breather (1.3 s) | 1 keyframe | Low–medium | Keep: costs nothing |
 | Lightning flash every 5 s | 1 keyframe | Medium | Keep: 0.2 flashes/s is well under the 3/s seizure limit; dim it (white at ≤ 40 % opacity); off with reduced motion |
@@ -316,7 +325,7 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | M2 Care | Garden (skies, rain, leaf shelter, plant stages) and Recharge Center; friendship line | Their acceptance criteria pass in `gate` |
 | M3 Moves | Move tutor, backpack and strain, pop-ups, Future moves + storage | Teach past N never blocks; Future moves survive reload |
 | M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; thoughts log; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
-| M5 Export and load | Garden Code, Markdown export, Share / Copy / Download, Load sheet, migrate | Export → wipe → load restores lasting facts exactly (and today's if same date); a truncated or edited code changes nothing; gate covers both |
+| M5 Export and load | Garden Code, both Markdown exports (Today; Thoughts and friendship), Share / Copy / Download, Load sheet, migrate | Export → wipe → load restores lasting facts exactly (and today's if same date); a truncated or edited code changes nothing; gate covers both |
 
 ## 9. Trade-offs taken
 
@@ -342,6 +351,6 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | 6 | A gentle support link for crisis days (spec risk) | Not in v1 | — |
 | 7 | ✅ Cut the menu morph and cursor blink (2026-10-29) | — | — |
 | 8 | ✅ Public page, private repo, no Access (2026-10-29) | — | — |
-| 9 | Friendship from distinct acts only ([§3](#derived-values))? Keep all 6 lines, since a loaded code carries friendship across days ([§3](#export-and-load)) | Yes to both | M2 |
-| 10 | Soften strain to a short tremble, then a slow sag ([§6](#6-animation-audit))? | Yes | M3 |
-| 11 | Copy for the Export and Load sheets, incl. the one-line privacy note ("Anyone with this code can read what's in it") and the code's name ("Garden Code")? | Claude drafts in Snoozle's voice, Sarah approves | M5 |
+| 9 | ✅ Friendship from distinct acts only; keep all 6 lines (2026-10-29) | — | — |
+| 10 | ✅ Soften strain: short tremble, then a slow sag (2026-10-29) | — | — |
+| 11 | Copy for the Export and Load sheets, incl. the privacy line and the code's name ("Garden Code"): Claude drafts in Snoozle's voice, Sarah approves (agreed 2026-10-29) | — | M5 |
