@@ -124,16 +124,16 @@ export const flows = [
         await goto(page, s);
         const st = await page.evaluate((s) => ({
           menu: !!document.querySelector('.menu') && document.querySelector('.menu').getBoundingClientRect().height > 0 && !document.querySelector('.menu').closest('[hidden]'),
-          back: document.querySelector('.backrow') && !document.querySelector('.backrow').hidden && document.querySelector('.backrow').getBoundingClientRect().height > 0,
+          back: [...document.querySelectorAll('button[data-act=home]')].filter((b) => !b.closest('[hidden]') && b.getBoundingClientRect().height > 0).length === 2,
           tabs: [...document.querySelectorAll('section.tab')].filter((t) => !t.hidden && t.getBoundingClientRect().height > 0).length,
         }), s);
         assert(!st.menu, `${s}: menu still visible`);
-        assert(st.back, `${s}: back row not shown`);
+        assert(st.back, `${s}: top and bottom Back not both shown`);
         assert(st.tabs === 1, `${s}: ${st.tabs} tabs visible`);
         await tap(page, 'button[data-act=home]');
         const h = await page.evaluate(() => ({
           menu: document.querySelector('.menu').getBoundingClientRect().height > 0 && !document.querySelector('.menu').closest('[hidden]'),
-          back: !document.querySelector('.backrow').hidden,
+          back: [...document.querySelectorAll('button[data-act=home]')].some((b) => !b.closest('[hidden]')),
           tabs: [...document.querySelectorAll('section.tab')].filter((t) => !t.hidden).length,
         }));
         assert(h.menu && !h.back && h.tabs === 0, `${s}: Back did not return Home cleanly`);
@@ -315,10 +315,10 @@ export const flows = [
       await boot(page, url);
       await goto(page, 'moves');
       const hint = () => page.$eval('section.tab:nth-of-type(3) > .hint', (n) => n.textContent);
-      assert((await hint()) === '4 feels right today. You can carry more, but it gets heavy.', 'plain hint');
+      assert((await hint()) === '4 feels right today.', 'plain hint');
       assert((await usualN(page)) === '4', 'default usual');
       await pickSky(page, 'drizzly');
-      assert((await hint()) === '🌧️ Drizzly today, so 3 feels right instead of your usual 4. You can carry more, but it gets heavy.', 'drizzly hint: ' + await hint());
+      assert((await hint()) === '🌧️ Drizzly today, so 3 feels right instead of your usual 4.', 'drizzly hint: ' + await hint());
       await pickSky(page, 'stormy');
       assert((await hint()).startsWith('⛈️ Stormy today, so 2 feels right instead of your usual 4.'), 'stormy hint');
       await pickSky(page, 'sunny');
@@ -623,6 +623,22 @@ export const flows = [
     },
   },
   {
+    name: 'moves: Snoozle and the add box stay in view on a small phone',
+    async run(page, url) {
+      await page.setViewport({ width: 375, height: 667 });
+      await boot(page, url);
+      await goto(page, 'moves');
+      for (let i = 1; i <= 5; i++) { await page.focus('#newmove'); await teach(page, `Move ${i}`); }
+      assert(await heavy(page), 'not heavy after 5 moves');
+      await page.focus('#newmove');
+      const r = await page.evaluate(() => {
+        const b = document.getElementById('buddy').getBoundingClientRect(), t = document.querySelector('.teach').getBoundingClientRect();
+        return { top: b.top, bottom: t.bottom, h: innerHeight };
+      });
+      assert(r.top >= 0 && r.bottom <= r.h, `Snoozle top ${Math.round(r.top)}, add box bottom ${Math.round(r.bottom)}, viewport ${r.h}`);
+    },
+  },
+  {
     name: 'safe area and 320px width',
     async run(page, url) {
       await page.setViewport({ width: 320, height: 800 });
@@ -657,14 +673,16 @@ export const flows = [
     },
   },
   {
-    name: 'forecast question only on the Garden',
+    name: 'forecast ask only on the Garden',
     async run(page, url) {
       await boot(page, url);
+      // The Garden title was cut (Sarah, 2026-10-29); Snoozle's Garden line now carries the ask.
       const count = () => page.evaluate((q) => [...document.querySelectorAll('body *')]
-        .filter((n) => n.checkVisibility() && n.children.length === 0 && n.textContent.includes(q)).length, 'What’s your forecast?');
+        .filter((n) => n.checkVisibility() && !n.closest('.sr') && n.children.length === 0 && n.textContent.includes(q)).length, 'pick the closest sky you see');
       assert((await count()) === 0, 'forecast shown on Home');
       for (const s of SCREENS) {
         await goto(page, s);
+        await dialog(page);
         const c = await count();
         assert(c === (s === 'garden' ? 1 : 0), `${s}: forecast count ${c}`);
         await tap(page, 'button[data-act=home]');

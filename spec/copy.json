@@ -14,7 +14,6 @@
   "Snoozle falls asleep right next to you. Total trust.",
   "You and Snoozle have been through every kind of weather together."
  ],
- "garden.title": "What’s your forecast?",
  "garden.intro": "Take a breath, close your eyes, and pick the closest sky you see. I’ll match it. Every kind of weather grows our garden.",
  "sky.sunny": "Sunshine dance! My leaves are all warm.",
  "sky.cloudy": "Ooh, it’s cloud-watching time. I spy a Snorlax! No, wait, or is it a Ditto?!?",
@@ -40,7 +39,6 @@
   "Almost there. No rush.",
   "Look what today grew."
  ],
- "recharge.title": "Recharge Center",
  "recharge.hint": "Snoozle gets hungry, thirsty and sleepy too. Whatever you do, Snoozle recharges with you.",
  "recharge.intro": "Pick anything, big or small. It all counts.",
  "recharge.grew": "Look, our plant grew!",
@@ -108,14 +106,12 @@
   "Wiggle wiggle! My roots feel looser.",
   "That felt good. Want to do a little more, or rest?"
  ],
- "moves.title": "Move tutor",
  "moves.hintBelow": [
   "today, so",
-  "feels right instead of your usual",
-  ". You can carry more, but it gets heavy."
+  "feels right instead of your usual"
  ],
  "moves.hintOk": [
-  "feels right today. You can carry more, but it gets heavy."
+  "feels right today."
  ],
  "moves.usual": "Your usual on a sunny day:",
  "moves.stepper": [
@@ -186,9 +182,8 @@
   ". Letting go is a move too."
  ],
  "moves.futureEmpty": "Nothing saved yet. That’s a nice, light feeling.",
- "thoughts.title": "Rustling in the tall grass",
- "thoughts.hint": "A thought appeared! Help us catalog and name it. Each thought has its own way through.",
- "thoughts.intro": "Rustle, rustle… something’s moving in the tall grass.",
+ "thoughts.hint": "Each thought has its own way through.",
+ "thoughts.intro": "Rustle, rustle… a wild thought appeared! Help us catalog and name it.",
  "thoughts.label": [
   "What’s the thought?",
   "(optional)"

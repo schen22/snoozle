@@ -99,7 +99,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 
 h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
 .hint{color:var(--muted);font-size:14px;margin:-4px 2px 12px}
-.tab h2:first-child{margin-top:16px}
+.tab{margin-top:16px}
 
 /* weather */
 .weather{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -138,13 +138,13 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
 .move.heavy{border-color:var(--heart);border-style:dashed}
 .mrow{display:flex;gap:6px;flex-wrap:wrap}
 .mini{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700}
-.teach{display:flex;gap:8px;margin-top:12px}
+.teach{display:flex;gap:8px;margin-bottom:12px}
 .teach input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border:2.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
 .pbtn{background:var(--leaf);color:var(--on-leaf);border:2.5px solid var(--line);border-radius:10px;padding:10px 16px;font-weight:800;box-shadow:0 3px 0 var(--line)}
 .daycare{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .daycare li{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--surface);border:2px dashed var(--line);border-radius:10px;padding:8px 10px;font-weight:700;overflow-wrap:anywhere}
 .daycare li.note{border-style:solid;color:var(--muted);font-weight:600}
-.baseline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;margin:0 2px 12px}
+.baseline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;margin:12px 2px 0}
 .baseline b{min-width:1.5em;text-align:center;font-size:18px}
 .step{width:44px;border:2px solid var(--line);border-radius:8px;background:var(--surface);font-weight:800;font-size:18px;line-height:1;box-shadow:0 2px 0 var(--line)}
 .step:active{transform:translateY(2px);box-shadow:none}
@@ -166,10 +166,10 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
 .menu button{display:flex;align-items:center;gap:8px;text-align:left;background:transparent;border:2px solid transparent;border-radius:8px;padding:8px 10px;font-weight:800;font-size:15px;line-height:1.15}
 .menu button .em{font-size:22px}
 .menu button:active{transform:translateY(1px)}
-.backrow{display:flex;align-items:center;gap:12px;margin-top:14px}
+.backrow{margin-top:18px}
+.back-top{position:absolute;top:8px;left:8px;z-index:2;padding:4px 12px;font-size:14px}
 .back{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2.5px solid var(--line);border-radius:8px;padding:7px 14px;font-weight:800;font-size:15px;box-shadow:0 3px 0 var(--line)}
 .back::before{content:"◂";color:var(--heart)}
-.where{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;background:var(--chip);border:2px solid var(--line);border-radius:8px;padding:6px 10px;line-height:1.15}
 .where::before{content:"▸";color:var(--heart)}
 .where .em{font-size:22px}
 .reset{display:block;margin:20px auto 8px;background:none;border:0;color:var(--muted);font-size:13px;text-decoration:underline;padding:0 16px}
@@ -293,7 +293,6 @@ const COPY = {
     drizzly: {e: '🌧️', label: 'Drizzly', say: 'Our garden’s getting watered now! I love listening to the pitter-patter of rain. Listen with me?'},
     stormy: {e: '⛈️', label: 'Stormy', say: 'Storms can be loud and tiring. Let’s tuck in somewhere cozy. The Recharge Center’s open if we need anything.'}},
   garden: {
-    title: 'What’s your forecast?',
     intro: 'Take a breath, close your eyes, and pick the closest sky you see. I’ll match it. Every kind of weather grows our garden.',
     card: 'Today’s garden',
     rain: 'Watered by today’s rain. ',
@@ -303,7 +302,6 @@ const COPY = {
       ['A bud is forming.', 'Almost there. No rush.'],
       ['In full bloom.', 'Look what today grew.']]},
   recharge: {
-    title: 'Recharge Center',
     hint: 'Snoozle gets hungry, thirsty and sleepy too. Whatever you do, Snoozle recharges with you.',
     intro: 'Pick anything, big or small. It all counts.',
     grew: ' Look, our plant grew!',
@@ -317,9 +315,8 @@ const COPY = {
       {k: 'art', e: '🎨', t: 'Make something', s: 'Messy counts', r: ['Ooh, can I add a leaf to it?', 'Making just for fun. No grades around here.']},
       {k: 'move', e: '🤸', t: 'Wiggle around', s: 'Stretch, dance, walk', r: ['Wiggle wiggle! My roots feel looser.', 'That felt good. Want to do a little more, or rest?']}]},
   moves: {
-    title: 'Move tutor',
-    hintBelow: (e, sky, n, b) => `${e} ${sky} today, so ${n} feels right instead of your usual ${b}. You can carry more, but it gets heavy.`,
-    hintOk: n => `${n} feels right today. You can carry more, but it gets heavy.`,
+    hintBelow: (e, sky, n, b) => `${e} ${sky} today, so ${n} feels right instead of your usual ${b}.`,
+    hintOk: n => `${n} feels right today.`,
     usual: 'Your usual on a sunny day:',
     fewer: 'Fewer moves',
     more: 'More moves',
@@ -351,9 +348,8 @@ const COPY = {
     bye: m => `Bye, ${m}. Letting go is a move too.`,
     futureEmpty: 'Nothing saved yet. That’s a nice, light feeling.'},
   thoughts: {
-    title: 'Rustling in the tall grass',
-    hint: 'A thought appeared! Help us catalog and name it. Each thought has its own way through.',
-    intro: 'Rustle, rustle… something’s moving in the tall grass.',
+    hint: 'Each thought has its own way through.',
+    intro: 'Rustle, rustle… a wild thought appeared! Help us catalog and name it.',
     label: 'What’s the thought?',
     optional: ' (optional)',
     placeholder: 'I have to say yes to everything or…',
@@ -613,8 +609,9 @@ function build() {
   ui.home = el('div', {}, el('div', {class: 'menu', role: 'navigation', 'aria-label': COPY.menuLabel},
     ...COPY.menu.map(([id, e, t]) => btn('go', id, '', em(e), el('span', {}, t)))),
     btn('reset', null, 'reset', COPY.reset));
-  ui.where = el('span', {class: 'where'});
-  ui.backrow = el('div', {class: 'backrow'}, btn('home', null, 'back', COPY.back), ui.where);
+  ui.backTop = btn('home', null, 'back back-top', COPY.back);
+  $('scene-wrap').append(ui.backTop);
+  ui.backrow = el('div', {class: 'backrow'}, btn('home', null, 'back', COPY.back));
 
   // Garden
   ui.sky = {};
@@ -635,7 +632,7 @@ function build() {
   ui.down = btn('usual', -1, 'step', '−'); ui.down.setAttribute('aria-label', M.fewer);
   ui.up = btn('usual', 1, 'step', '+'); ui.up.setAttribute('aria-label', M.more);
   const input = el('input', {id: 'newmove', placeholder: M.placeholder, maxlength: 40, 'aria-label': M.inputLabel});
-  input.addEventListener('focus', () => input.scrollIntoView({block: 'center'}));
+  input.addEventListener('focus', () => input.scrollIntoView({block: 'nearest'}));
   input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) ui.teach.click(); });
   ui.teach = btn('teach', null, 'pbtn', M.teach);
   // Thoughts
@@ -643,18 +640,17 @@ function build() {
   const kinds = el('div', {class: 'kinds'}, ...T.kinds.map((k, i) => btn('kind', i, 'kbtn', k.t, el('small', {}, k.s))));
 
   const tab = (id, ...kids) => (ui[id] = el('section', {class: 'tab'}, ...kids));
-  app.append(ui.bond, dialog, ui.home, ui.backrow,
-    tab('garden-tab', el('h2', {}, G.title), weather, el('h2', {}, G.card), ui.garden),
-    tab('recharge-tab', el('h2', {}, COPY.recharge.title), el('p', {class: 'hint'}, COPY.recharge.hint), camp),
-    tab('moves-tab', el('h2', {}, M.title), ui.moveHint,
-      el('div', {class: 'baseline'}, M.usual, ui.down, ui.usual, ui.up), ui.grid,
-      el('div', {class: 'teach'}, input, ui.teach),
+  app.append(ui.bond, dialog, ui.home,
+    tab('garden-tab', weather, el('h2', {}, G.card), ui.garden),
+    tab('recharge-tab', el('p', {class: 'hint'}, COPY.recharge.hint), camp),
+    tab('moves-tab', ui.moveHint, el('div', {class: 'teach'}, input, ui.teach), ui.grid,
+      el('div', {class: 'baseline'}, M.usual, ui.down, ui.usual, ui.up),
       el('h2', {}, M.future), el('p', {class: 'hint'}, M.futureHint), ui.future),
-    tab('thoughts-tab', el('h2', {}, T.title), el('p', {class: 'hint'}, T.hint),
+    tab('thoughts-tab', el('p', {class: 'hint'}, T.hint),
       el('div', {class: 'grass-box'}, el('div', {class: 'grass-anim', 'aria-hidden': 'true'}, '🌾🌾🌾'),
         el('label', {for: 'thought'}, T.label, el('span', {}, T.optional)),
         el('textarea', {id: 'thought', placeholder: T.placeholder}),
-        el('p', {}, T.ask), kinds)));
+        el('p', {}, T.ask), kinds)), ui.backrow);
   ui.msay = el('p', {id: 'msay'}); ui.mopts = el('div', {class: 'opts'});
   ui.modal = el('div', {class: 'modal', hidden: true}, el('div', {class: 'sheet'},
     el('div', {class: 'dialog', role: 'dialog', 'aria-modal': 'true'}, el('span', {class: 'nametag'}, COPY.tag), ui.msay, ui.mopts)));
@@ -720,9 +716,8 @@ function renderSheet() {
 function render(d) {
   renderScene(d);
   const home = state.screen === 'home';
-  ui.home.hidden = !home; ui.backrow.hidden = home;
+  ui.home.hidden = !home; ui.backrow.hidden = ui.backTop.hidden = home;
   for (const [id] of COPY.menu) ui[id + '-tab'].hidden = state.screen !== id;
-  if (!home) { const [, e, t] = COPY.menu.find(m => m[0] === state.screen); ui.where.replaceChildren(em(e), t); }
   for (const id in ui.sky) ui.sky[id].setAttribute('aria-pressed', d.sky === id);
   const rainy = d.sky === 'drizzly' || d.sky === 'stormy', [cap, more] = COPY.garden.stages[d.stage];
   ui.garden.innerHTML = plantSVG(d.stage, rainy);
