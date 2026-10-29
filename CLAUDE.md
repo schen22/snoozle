@@ -61,3 +61,9 @@ beyond the spec's acceptance criteria.
   lanes read that (188 lines), never the spec doc, for wording.
 - 2026-10-29 · Lanes that own different files ran side by side cleanly (copy lane + design review); everything in one
   `index.html` forced serial work. Split by file before parallelising.
+- 2026-10-29 · Flow tests hardcode some copy: a copy-only edit to `moves.bye` passed `gate:fast` but failed
+  `npm run gate` (`test/flows.mjs:411` expected the old line). After any copy change, grep `test/` for the old
+  string and run the full gate, until the tests read from `COPY`.
+- 2026-10-29 · The lesson above (split by file) was on the page but not used: the six-cards change was planned as
+  serial work until Sarah asked. When writing a plan table, give each step its owned files and mark which can run
+  as parallel lanes.
