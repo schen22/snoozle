@@ -408,7 +408,7 @@ export const flows = [
       assert((await sel(page, '.mtext')).join() === 'Email', 'brought back');
       await tap(page, '.move:nth-child(1) button[data-act=save]');
       await tap(page, '.daycare button[data-act=letgo]');
-      assert((await dialog(page)) === 'Bye, Email. Letting go is a move too.', 'bye line');
+      assert((await dialog(page)) === 'Poof! Email drifted off on the breeze. My leaves feel lighter already.', 'bye line');
       assert((await sel(page, '.daycare li')).join() === 'Nothing saved yet. That’s a nice, light feeling.', 'empty again');
     },
   },

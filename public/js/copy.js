@@ -170,7 +170,7 @@ const COPY = {
         s: "A quick hello counts",
         r: [
           "I love hearing your friend’s voice. You sound lighter.",
-          "Good teams take turns carrying each other.",
+          "My roots feel steadier already. We don’t have to carry it all alone.",
         ],
       },
       {
@@ -266,7 +266,8 @@ const COPY = {
     // Button label on a Future move
     letGo: "Let go",
     // Reply after tapping Let go
-    bye: (m) => `Bye, ${m}. Letting go is a move too.`,
+    bye: (m) =>
+      `Poof! ${m} drifted off on the breeze. My leaves feel lighter already.`,
     // Future moves list when it is empty
     futureEmpty: "Nothing saved yet. That’s a nice, light feeling.",
   },
