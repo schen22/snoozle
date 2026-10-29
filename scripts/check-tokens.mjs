@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Token check: #hex colours only in public/css/tokens.css (none in index.html, app.css, motion.css, public/js/**);
 // no digits in COPY strings (in public/js/copy.js)
-// (placeholders excepted); Recharge cards fit their card (title ≤ 14, small line ≤ 20, replies ≤ 2 sentences).
+// (placeholders excepted); Recharge cards fit their card (title ≤ 14, small line ≤ 20, replies ≤ 2 sentences);
+// choice buttons are five words at most.
 // Prints problems (capped) and a summary; exit 1 on any.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -37,6 +38,11 @@ for (const c of COPY.recharge.cards) {
   if (c.t.length > 14) problems.push(`card ${c.k} title over 14 characters: ${c.t}`);
   if (c.s.length > 20) problems.push(`card ${c.k} small line over 20 characters: ${c.s}`);
   for (const r of c.r) if ((r.match(/[.!?]+(?=\s|$)/g) || []).length > 2) problems.push(`card ${c.k} reply over 2 sentences: ${r.slice(0, 60)}`);
+}
+// 4. Choice buttons (thought kinds, their sheet options, the heavy-backpack sheet): five words at most.
+const T = COPY.thoughts, M = COPY.moves;
+for (const b of [...T.kinds.flatMap((k) => [k.t, ...k.opts.map((o) => o.label)]), T.wander.label, M.heavySave, M.heavyCarry]) {
+  if (b.trim().split(/\s+/).length > 5) problems.push(`choice button over 5 words: ${b}`);
 }
 console.log(`tokens: ${problems.length} problem(s); ${strings} COPY strings scanned`);
 for (const p of problems.slice(0, 5)) console.log(`  ${p}`);
