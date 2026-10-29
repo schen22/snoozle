@@ -17,7 +17,7 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph,
       moves cap counts used moves, new "Used it" line, screen titles cut, Back top + bottom, Moves order,
-      Thoughts opening line and hints).
+      Thoughts opening line and hints, one Back + back gesture, Moves copy said once, Recharge/Thoughts hints cut).
 
 ## Later
 
@@ -121,3 +121,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   has its own way through."; the moves hint drops "You can carry more, but it gets heavy." (the heavy reaction says it).
 - 2026-10-29 — **Snoozle contrast**: light-mode body vs sky was 1.15:1. Outline 3 → 4 and a ground shadow; a darker
   sky everywhere was rejected (dulls sunny, P5). A darker patch behind him waits on Sarah's look.
+- 2026-10-29 — **Snoozle's face**: in dark mode the face used `--line` (light) and vanished on the cream body (Sarah's
+  phone). New `--face` token, dark in both themes. Snoozle, umbrella and shadow drawn 1.3× larger, shapes unchanged.
+- 2026-10-29 — **One Back** (on the scene); the phone's back gesture returns Home via one history entry per visit.
+- 2026-10-29 — **Moves copy says each number once** (game / product / content review): N in the hint, the usual in
+  the stepper, feeling in Snoozle's lines. Cut the Recharge and Thoughts hints, "instead of your usual", and
+  **"We usually carry about four"** (reverses Q4), and the Future moves hint while the list is empty.
