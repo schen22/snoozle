@@ -146,12 +146,14 @@ export const flows = [
         const got = await dialog(page);
         assert(got === line, `${sky}: dialog was "${got}"`);
         assert(await page.$eval('#scene', (n, c) => n.classList.contains(c), 'w-' + sky), `${sky}: scene class missing`);
-        await new Promise((r) => setTimeout(r, 900)); // shelter transition
-        const op = await page.$eval('.umbrella', (n) => +getComputedStyle(n).opacity);
         const rainy = sky === 'drizzly' || sky === 'stormy';
-        assert(rainy ? op > 0.9 : op < 0.1, `${sky}: leaf shelter opacity ${op}`);
+        await page.waitForFunction((rainy) => {
+          const o = +getComputedStyle(document.querySelector('.umbrella')).opacity;
+          return rainy ? o > 0.9 : o < 0.1;
+        }, { timeout: 3000 }, rainy).catch(() => { throw new Error(`${sky}: leaf shelter ${rainy ? 'not shown' : 'not hidden'}`); });
         counts[sky] = await page.$$eval('#rain .drop', (d) => d.filter((n) => getComputedStyle(n).display !== 'none').length);
       }
+      // Drop positions are random, but the count is fixed and the drizzly cut is a CSS rule, so the visible count is deterministic.
       assert(counts.stormy > 0 && counts.drizzly <= 24, `drop counts ${JSON.stringify(counts)}`);
       const ratio = counts.drizzly / counts.stormy;
       assert(ratio > 0.25 && ratio < 0.42, `drizzly/stormy drops ${counts.drizzly}/${counts.stormy}`);
@@ -171,7 +173,7 @@ export const flows = [
       assert((await caption(page)) === STAGES[3][0], `stormy swap: "${await caption(page)}"`);
       await pickSky(page, 'sunny');
       assert((await caption(page)) === STAGES[2][0], `back to sunny: "${await caption(page)}"`);
-      assert((await bondIdx(page)) === 1, 'friendship should be 2 (sky + one card)');
+      assert((await bondIdx(page)) === 1, 'friendship is 2 (sky + food): expected "warming up"');
     },
   },
   {
@@ -181,16 +183,20 @@ export const flows = [
       await goto(page, 'recharge');
       assert((await dialog(page)) === 'Pick anything, big or small. It all counts.', 'recharge intro wrong');
       const keys = ['food', 'water', 'rest', 'pit', 'outside'];
-      let grew = 0, before = await page.$eval('#scenePlant', (n) => n.innerHTML);
+      let grew = 0, stage = 0;
+      const WANT = [1, 1, 2, 2, 3]; // stage after each of the 5 taps (water 1..5)
+      assert((await caption(page)) === STAGES[0][0], 'not a seed at start');
       for (const k of keys) {
-        await new Promise((r) => setTimeout(r, 700)); // let the previous pop (600 ms) end
+        await page.waitForFunction(() => document.getElementById('scenePlant').getAnimations().length === 0, { timeout: 3000 }); // previous pop finished
         const popped = await page.evaluate((k) => {
           document.querySelector(`button[data-act=care][data-arg=${k}]`).click();
           return document.getElementById('scenePlant').getAnimations().length > 0;
         }, k);
         const line = await dialog(page);
-        const now = await page.$eval('#scenePlant', (n) => n.innerHTML);
-        const isNew = now !== before; before = now;
+        const cap = await caption(page);
+        const now = STAGES.findIndex((x) => x[0] === cap);
+        assert(now === WANT[keys.indexOf(k)], `${k}: stage ${now}, wanted ${WANT[keys.indexOf(k)]}`);
+        const isNew = now > stage; stage = now;
         assert(line === CARDS[k][0] + (isNew ? ' Look, our plant grew!' : ''), `${k}: reply "${line}"`);
         assert(popped === isNew, `${k}: plant pop ${popped} vs new stage ${isNew}`);
         if (isNew) grew++;
@@ -216,16 +222,15 @@ export const flows = [
       await goto(page, 'recharge');
       await careTap(page, 'food');
       assert((await bondIdx(page)) === 1, 'friendship 2 should be "warming up"');
-      let prev = 1;
-      for (const k of ['food', 'food', 'water', 'rest', 'rest']) {
+      // [card, expected line index]: friendship 2,2,3,4,4,5,6
+      for (const [k, want] of [['food', 1], ['water', 1], ['rest', 1], ['rest', 1], ['outside', 1], ['pit', 2]]) {
         await careTap(page, k);
         const i = await bondIdx(page);
-        assert(i >= prev, `line went down at ${k}: ${prev} -> ${i}`);
-        prev = i;
+        assert(i === want, `after ${k}: line ${i}, wanted ${want}`);
       }
       await goto(page, 'garden');
       await pickSky(page, 'stormy');
-      assert((await bondIdx(page)) >= prev, 'line fell after a sky change');
+      assert((await bondIdx(page)) === 2, 'line changed after a repeat sky pick');
     },
   },
   {
@@ -237,12 +242,12 @@ export const flows = [
       const texts = () => page.$eval('.today-garden', (n) => [...n.querySelectorAll('p,small')].map((x) => x.textContent));
       assert((await texts()).join('|') === STAGES[0].join('|'), 'seed caption wrong');
       await pickSky(page, 'sunny');
-      assert(!(await texts())[1].startsWith('Watered'), 'sunny day shows rain line');
+      assert((await texts()).length === 2 && !(await texts())[1].startsWith('Watered'), 'sunny day shows rain line');
       await pickSky(page, 'drizzly');
       const [c, s] = await texts();
       assert(c === STAGES[1][0] && s === 'Watered by today’s rain. ' + STAGES[1][1], `rain caption "${s}"`);
       await pickSky(page, 'stormy');
-      assert((await texts())[1].startsWith('Watered by today’s rain.'), 'stormy caption lacks rain line');
+      assert((await texts()).length === 2 && (await texts())[1].startsWith('Watered by today’s rain.'), 'stormy caption lacks rain line');
     },
   },
 ];

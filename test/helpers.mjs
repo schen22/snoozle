@@ -38,7 +38,10 @@ export async function closeAll() { await browser?.close(); server?.close(); }
 // Page with .errors and .fakeDate(iso) (call before goto); window.__setFake(iso) jumps the fake clock.
 export async function openAt(width) {
   const b = await getBrowser();
-  const page = await b.newPage();
+  const ctx = await b.createBrowserContext();
+  const page = await ctx.newPage();
+  const close = page.close.bind(page);
+  page.close = async () => { await close().catch(() => {}); await ctx.close().catch(() => {}); };
   await page.setViewport({ width, height: 800 });
   const errors = [];
   page.errors = errors;
