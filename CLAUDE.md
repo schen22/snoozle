@@ -64,3 +64,8 @@ beyond the spec's acceptance criteria.
 - 2026-10-29 · Flow tests hardcode some copy: a copy-only edit to `moves.bye` passed `gate:fast` but failed
   `npm run gate` (`test/flows.mjs:411` expected the old line). After any copy change, grep `test/` for the old
   string and run the full gate, until the tests read from `COPY`.
+- 2026-10-29 · The lesson above (split by file) was on the page but not used: the six-cards change was planned as
+  serial work until Sarah asked. When writing a plan table, give each step its owned files and mark which can run
+  as parallel lanes.
+- 2026-10-29 · Time load speed with `npm run perf` (Lighthouse), never puppeteer's network/CPU throttling: a throttled
+  first-tap flow took 43–57 s even on the old one-file page, while every file had loaded by ~6 s.
