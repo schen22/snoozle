@@ -52,21 +52,46 @@ is how "every tap gets immediate, visible feedback" stays true.
 | Vanilla JS, re-render the panel per action | ~40 controls; a framework would add 40+ KB and a build | Re-render visibly drops focus or input text (then patch only changed nodes) |
 | Cloudflare Pages | Private-repo Git deploys at $0, Brotli, edge cache | Cloudflare retires Pages for new projects (then Workers static assets, same files) |
 
-## 2. Code layout inside `index.html`
+## 2. Code layout
 
-Sections in this order, each behind a `// ── NAME ──` comment so an agent can jump to them:
+Standard web files under `public/`, no build step: native ES modules, plain CSS files (split 2026-10-29 with a
+system design + web dev review; the web dev engineer has the final say on refactor and architecture calls).
 
-| Section | Holds | Rule |
-|---|---|---|
-| `TOKENS` (CSS) | Spec colour tokens, light + `prefers-color-scheme: dark` | Every colour is a variable; no hex outside this block |
-| `COPY` | Every user-visible string, in [`public/js/copy.js`](public/js/copy.js) by screen and situation | The source of truth for copy; strings appear nowhere else |
-| `STATE` | `newDay()` defaults + `day` object + `futureMoves` | Only `act()` mutates |
-| `STORE` | `store.load()` → lasting facts, `store.save(lasting)` | The only code that knows where data lives (v1: `localStorage`). `load` runs once at boot and may be async; `save` is fire-and-forget, so `act()` never waits on storage. Wrapped in try/catch; app works if storage throws |
-| `CLOCK` | Date check on load, `visibilitychange`, every 60 s | New date → `act('newDay')` |
-| `ACT` | One function per action in the spec tables | Returns nothing; ends with `render()` |
-| `RENDER` | Scene, backpack, friendship line, panel per screen | Built with a 10-line `el(tag, attrs, ...kids)` helper: user text becomes text nodes, never `innerHTML`. Each screen's skeleton (headings, inputs) is built once; `render()` replaces only its lists and labels, so a typed draft and keyboard focus survive every action |
-| `FX` | Body reactions, particles, plant pop ([§6](#motion-system)) | One `play()` wrapper: Web Animations for one-shots, CSS classes for loops; returns at once with reduced motion |
-| `DIALOG` | Typer (18 ms/char), tap to skip, `▾` | One typer at a time; a new line cancels the old. Types into an `aria-hidden` span; the full line goes to a visually hidden `aria-live` span once |
+| File | Holds |
+|---|---|
+| `index.html` | `<head>` links (CSS, fonts, one `modulepreload` per module), the scene SVG (static, paints before JS), `<script type="module" src="js/main.js">` |
+| `_headers` | CSP (`script-src 'self'`; `style-src` keeps `'unsafe-inline'` for SVG `style=""`), `noindex`, nosniff, no-referrer |
+| `css/tokens.css` | Colour tokens, light and dark: the only file with hex colours |
+| `css/app.css` · `css/motion.css` | Layout and components · keyframes and loops (inside `prefers-reduced-motion: no-preference`) |
+| `js/copy.js` | Every user-visible string by screen and situation, with a "when it shows" note: the source of truth for copy |
+| `js/state.js` | `state` (facts only), `freshDay`, `derive()`, `kindOpts`. Only `act()` mutates |
+| `js/store.js` | `localStorage` `snoozle:v1`: the only code that knows where data lives; validated; never throws |
+| `js/clock.js` | `dateKey()`, `watchDay()` (visibilitychange + every 60 s) |
+| `js/actions.js` | `REDUCERS` (what each action changes), `lineFor` (what Snoozle says), `effectsFor` (effects as data). No DOM |
+| `js/act.js` | The pipeline: reduce → derive → render → save → say → fx |
+| `js/view/dom.js` | `el()`, `btn()`, `$`, the shared `ui` registry, `reduced()`, `tok()`. User text only as text nodes |
+| `js/view/plants.js` · `build.js` · `render.js` | Plant SVG strings · screen skeletons built once (drafts and focus survive) · per-render updates |
+| `js/fx.js` · `js/dialog.js` | Web Animations one-shots and particles · the typewriter (aria-hidden span; full line to `aria-live` once) |
+| `js/main.js` | Boot and wiring: taps (one delegated `data-act` listener), back gesture, clock, storage, fonts; `window.__snoozle` under webdriver only |
+
+Import direction (`check-deps`): `copy`, `view/dom`, `store`, `clock` import nothing; `state` → `copy`;
+`view/*` → `copy`, `state`, `view`; `fx` and `dialog` → `view/dom`; `actions` → `copy`, `state`, `clock`.
+Only `act.js` and `main.js` cross layers.
+
+### File standard
+
+1. **[gate]** ES modules only; no inline script or handler (CSP `script-src 'self'`; the tests send the CSP).
+2. **[gate]** JS and CSS files ≤ 200 lines, `index.html` ≤ 150 (`check-size`). `copy.js` is exempt. At the cap,
+   split first in a commit that changes no behaviour.
+3. **[gate]** Imports follow the direction above (`check-deps`).
+4. **[gate]** Every module is a `modulepreload` and every stylesheet a `<link>` in `index.html` (`check-preload`).
+5. **[gate]** Hex colours only in `tokens.css`; no digits in copy; sprite shapes match the prototype.
+6. **[gate]** HTML + CSS + JS ≤ 20 KB brotli; load-time budgets in [§5](#5-load-time).
+7. **[doc]** Lanes own whole files, never sections; a new feature goes in a new file in its layer where it can.
+   Files that two lanes would both edit (`index.html`, `copy.js`) go to one lane at a time.
+8. **[doc]** Effects are plain data from `actions.js`; only `fx.js` runs animations; loops stay CSS classes.
+9. **[doc]** User text through `textContent`; behaviour only through `data-act`.
+10. **[doc]** Moves and splits by line-range script, never by retyping a file; check the moved bytes match.
 
 **Sprites are kept from the prototype as drawn.** The scene (sky, sun, clouds, bolt, ground, tufts, leaf shelter),
 Snoozle (body, leaves, feet, open/closed eyes, cheeks, happy/strain mouths, brows, sweat, "z z"), the backpack and
@@ -74,11 +99,11 @@ bundles, and the four plant stages (`plantSVG()`) are copied with their paths, c
 unchanged. The only structural change: Snoozle's parts move from `#buddy-inner` into the nested motion groups
 ([§6](#motion-system)), with no shape edited. Source of truth: [reference/prototype.html](reference/prototype.html)
 (version `1793255127-8d01`, sha256 `b1ecc2e4…`). `gate:fast` checks that every SVG shape in the prototype
-(element + geometry attributes) still appears in `index.html`, so a redraw has to be deliberate: update the
+(element + geometry attributes) still appears in `index.html` or `js/**`, so a redraw has to be deliberate: update the
 reference in the same commit and say why.
 
 Events: one delegated `click` listener reads `data-act="…"` and `data-arg="…"`; Enter in the move input = Teach.
-The move input calls `scrollIntoView({block: "center"})` on focus so the iPhone keyboard doesn't hide it. With
+The move input calls `scrollIntoView({block: "nearest"})` on focus so the iPhone keyboard doesn't hide it. With
 renaming gone, no bottom sheet holds an input. Avoid `100vh`, because iOS toolbars make it taller than the screen.
 
 ## 3. State
@@ -247,36 +272,33 @@ change) stays available if that changes. Ship a `_headers` file, which also asks
 ```
 
 `'unsafe-inline'` is the price of one self-contained file; the rule that user text is never parsed as HTML
-([§2](#2-code-layout-inside-indexhtml)) is what actually prevents injection. The policy still blocks any network
+([§2](#2-code-layout)) is what actually prevents injection. The policy still blocks any network
 call the spec doesn't allow.
 
 ## 5. Load time
 
-Budget, checked as computed values, never by eye:
+Targets agreed 2026-10-29 (web dev, web performance and game engineer panel; checked by the web engineer):
 
-| Metric | Budget | Measured / estimated | How checked |
+| Metric | Limit | Measured by | Why |
 |---|---|---|---|
-| `index.html` brotli | ≤ 20 KB | prototype 13.0 KB (46.4 KB raw, 14.8 KB gzip) | `gate:fast`: `scripts/budget.mjs` compresses and compares |
-| Total transfer, first load | ≤ 70 KB | ~13 + 1.6 (font CSS) + 39.2 (Nunito, one variable file for 400/600/800) + 4.7 (Press Start 2P) ≈ **59 KB** | `npm run perf` |
-| FCP, Slow 4G | ≤ 1.5 s | ~1.0 s (below) | `npm run perf` |
-| LCP, Slow 4G | ≤ 2.0 s | ~1.0–1.3 s | same |
-| CLS | ≤ 0.1 | unknown: font swap may shift the dialog | same |
-| Lighthouse performance | ≥ 95 | — | same |
+| LCP | ≤ 2.0 s; warn at 1.3 s | `npm run perf`: Lighthouse median of 5, simulated Slow 4G | Under Core Web Vitals' 2.5 s with margin |
+| FCP | ≤ 1.5 s | same | First sign of life |
+| First tap ready | ≤ 2.5 s | Lighthouse TTI (a weak proxy) | Taps must work (P1) |
+| CLS | ≤ 0.1; warn at 0.05 | same | A calm page doesn't shift |
+| Requests | ours ≤ 20, all ≤ 25 | same | Simulated time grows with request count |
+| Brotli, HTML + CSS + JS | ≤ 20 KB | `gate:fast` (`budget.mjs`) | Existing budget |
+| Real phone | once per milestone | Sarah's phone; WebPageTest when it matters | The lab is a model |
 
-**Arithmetic (and what it assumes):** connection to Cloudflare ≈ 3 RTT (DNS, TCP, TLS) = 450 ms, request 150 ms,
-13 KB at ~200 KB/s ≈ 65 ms → HTML at ~0.7 s. The font stylesheet is render-blocking: +1 RTT on an already
-preconnected origin → FCP ≈ 0.85–1.0 s. Font files: +1 RTT + 44 KB ≈ 0.4 s → swap at ~1.2 s. It assumes the
-preconnect hints finish before the CSS is requested and that Cloudflare's edge is ≤ 1 RTT away.
+**Measured 2026-10-29** (median of 5): FCP 1.41 s, LCP 1.41 s, TTI 1.41 s, CLS 0.086, our requests 17,
+18.9 KB brotli. Before the split (one file): FCP/LCP 0.94–1.01 s. The difference is mostly Lighthouse's
+simulation charging every early request: inlining all CSS, putting the first lines of copy in the HTML, or
+blocking the fonts each left LCP at ~1.3–1.45 s. So the split costs ~0.4 s in the lab and an estimated
+0.1–0.3 s on a real phone.
 
-**Refuted if** Lighthouse reports FCP > 1.5 s or CLS > 0.1. Fixes, in order of cost:
-
-1. Load the font CSS without blocking (`media="print" onload="this.media='all'"`) and size the fallback to
-   Nunito's metrics (`size-adjust`) to keep CLS down.
-2. Self-host the two `woff2` files on Pages (same origin: saves 2 connections, ~300–600 ms on Slow 4G; drops the
-   Google IP leak). Cost: 3 files instead of 1, fonts fall back to system on `file://`.
-3. Drop Press Start 2P (4.7 KB, one name tag) for a system monospace.
-
-Inline SVG for the scene and Snoozle: no image requests. No JS runs before first paint except the theme tokens (CSS).
+Tried and dropped: `Link` headers for Early Hints (Pages sent no 103, and lab FCP doubled to 2.9 s); a 5-minute
+cache (unhashed modules could mix old and new after a deploy, so Pages' `max-age=0` + ETag stays). The font CSS
+loads as `media="print"` and `main.js` switches it on, so it never blocks first paint. CLS swings 0.001–0.087 with
+the font swap: if it passes 0.1, add a size-adjusted fallback `@font-face` or self-host the fonts.
 
 ## 6. Animation audit
 
@@ -331,9 +353,9 @@ over one `animation` property, and no `!important` is needed:
 
 | Command | Runs | Time |
 |---|---|---|
-| `npm run gate:fast` | Docs links (`check-docs.mjs`) · brotli budget (`index.html` + `public/js/*.js`) · sprite shapes · no hex colour outside `TOKENS` or in `copy.js` · no digits in `COPY` except N, B and the stepper | < 2 s |
-| `npm run gate` | `gate:fast` + puppeteer-core with installed Chrome at 320, 390, 460 px: no horizontal scroll, tap targets ≥ 44 px, **zero `pageerror` or console errors**, the spec's acceptance criteria as scripted flows (menu → screen → Back, skies, plant stages, teach past N, save/let go, Future moves survive reload, a corrupt `snoozle:v1` reads as empty, midnight reset with a faked clock) | < 30 s |
-| `npm run perf` | `npx lighthouse` (mobile preset, simulated Slow 4G) with the installed Chrome against the local server; prints FCP, LCP, CLS, score, bytes. Fonts load from Google for real | ~30 s, needs network for fonts; run at each milestone |
+| `npm run gate:fast` | Docs links · brotli budget (HTML + CSS + JS) · sprite shapes · hex only in `tokens.css` · no digits in `COPY` except N, B and the stepper · preloads match files · file sizes · import direction | < 2 s |
+| `npm run gate` | `gate:fast` + puppeteer-core with installed Chrome at 320, 390, 460 px: no horizontal scroll, tap targets ≥ 44 px, **zero `pageerror` or console errors** under the site's CSP, the spec's acceptance criteria as scripted flows (menu → screen → Back, skies, plant stages, teach past N, save/let go, Future moves survive reload, a corrupt `snoozle:v1` reads as empty, midnight reset with a faked clock) | < 30 s |
+| `npm run perf` | `npx lighthouse` ×5 (mobile preset, simulated Slow 4G) with the installed Chrome against the local server, which sends `_headers`; prints medians against [§5](#5-load-time). `PERF_RUNS=1` for a quick look | ~2–3 min, needs network for fonts; run at each milestone |
 
 Copy is edited in [`public/js/copy.js`](public/js/copy.js), which replaced the spec-mirror check
 (`spec/copy.json`, 2026-10-29).

@@ -11,7 +11,7 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
    (a Claude Doc; read it with the Claude Docs tools, never web-fetch). Copy lives in [`public/js/copy.js`](public/js/copy.js) (source of truth; curly quotes).
    Visual reference: [prototype](https://claude.ai/artifact/G8WajKiR8gzECqxB3Y7gGD). Spec wins over the prototype;
    [PLAN Decisions](PLAN.md#decisions) win over the spec.
-3. How it's built: [ARCHITECTURE §2 Code layout](ARCHITECTURE.md#2-code-layout-inside-indexhtml).
+3. How it's built: [ARCHITECTURE §2 Code layout](ARCHITECTURE.md#2-code-layout).
 4. Docs check: `npm run gate:fast`. Full check before commit: `npm run gate`.
 
 ## Success rubric (the spec's design principles)
@@ -28,7 +28,7 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 ## Constraints
 
-- One `public/index.html` (the only page served, with `public/_headers`), inline CSS + vanilla JS. No framework, build, backend, accounts, analytics, or network calls
+- Static files in `public/` ([ARCHITECTURE §2](ARCHITECTURE.md#2-code-layout)): `index.html`, `css/`, ES modules in `js/`, `_headers`. Vanilla JS and CSS. No framework, build, backend, accounts, analytics, or network calls
   beyond Google Fonts. No new dependency without a named need (dev-only `puppeteer-core` is the one allowed).
 - Stored: Future moves only (`localStorage` `snoozle:v1`). Nothing else persists in v1; export and load are v2 ([ARCHITECTURE: Export and load](ARCHITECTURE.md#export-and-load)).
 - Load: ≤ 20 KB brotli HTML, LCP ≤ 2.0 s on Slow 4G ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).

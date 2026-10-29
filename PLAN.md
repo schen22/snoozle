@@ -141,3 +141,10 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — **Recharge: eight cards become six** (Sarah, option B). Food takes water ("Eat or drink"), move
   takes outside ("Stretch or step out"); Bathroom stays. Card limits: title ≤ 14 characters, small line ≤ 20,
   replies ≤ 2 sentences. `BOND_AT` unchanged; a day now reaches at most 14 friendship (was 16).
+- 2026-10-29 — **File split** (Sarah: leaner plan; web dev engineer has the final say on refactor calls): CSS in
+  `css/` (3 files), JS as 13 ES modules plus `copy.js`, the standard in [ARCHITECTURE §2](ARCHITECTURE.md#file-standard),
+  gated by `check-size` (≤ 200 lines, `index.html` ≤ 150, `copy.js` exempt), `check-deps` and `check-preload`.
+  CSP `script-src 'self'`; the tests send the CSP.
+- 2026-10-29 — **Load-time targets** ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)): LCP ≤ 2.0 s (warn 1.3), FCP ≤ 1.5 s,
+  first tap ≤ 2.5 s, CLS ≤ 0.1 (warn 0.05), our requests ≤ 20, median of 5 runs. The split costs ~0.4 s in the lab
+  (1.41 s); Early Hints and a short cache were tried and dropped; static first-paint copy (option B) gave no gain.
