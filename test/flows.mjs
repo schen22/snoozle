@@ -658,7 +658,7 @@ export const flows = [
     async run(page, url) {
       await page.setViewport({ width: 320, height: 800 });
       await boot(page, url);
-      const css = await page.$$eval('style', (s) => s.map((x) => x.textContent).join('\n'));
+      const css = await page.evaluate(() => [...document.styleSheets].flatMap((sh) => { try { return [...sh.cssRules].map((r) => r.cssText); } catch { return []; } }).join('\n'));
       const m = css.match(/body\s*\{[^}]*padding:[^;}]*[;}]/);
       assert(m && ['top', 'right', 'bottom', 'left'].every((e) => m[0].includes(`env(safe-area-inset-${e}`)), 'body padding lacks env(safe-area-inset-*)');
       assert(/\.modal\s*\{[^}]*env\(safe-area-inset-bottom/.test(css), 'pop-up lacks safe-area padding');

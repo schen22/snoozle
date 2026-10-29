@@ -1,0 +1,33 @@
+/* Snoozle's Garden: motion (moved from index.html) */
+/* ── MOTION ── */
+@media (prefers-reduced-motion: no-preference){
+  #sky{transition:fill .6s}
+  .sun,#rain{transition:opacity .6s}
+  .cloud{transition:fill .6s,opacity .6s}
+  .zz{transition:opacity .5s}
+  .umbrella{transition:opacity .3s,transform .7s var(--ease-spring)}
+  .wbtn,.cbtn,.back,.step{transition:transform .1s}
+  .drop{animation:fall .9s linear infinite}
+  .w-drizzly .drop{animation-duration:2.2s}
+  .w-stormy #bolt{animation:flash 5s infinite}
+  .a-bounce #buddy-idle{animation:bounce .7s ease-in-out infinite}
+  .a-sway #buddy-idle{animation:sway 3.6s ease-in-out infinite}
+  .a-droop #buddy-idle{animation:droop 3s ease-in-out infinite}
+  .a-nap #buddy-idle{animation:breathe 3.2s ease-in-out infinite}
+  #scene.heavy #buddy-idle{animation:none}
+  #scene.heavy #buddy-pose{animation:sag 2.4s ease-in-out infinite}
+  #typed::after{animation:blink 1s steps(2) infinite}
+  .grass-anim{animation:rustle .25s ease-in-out 6}
+  .tab:not([hidden]),#home:not([hidden]){animation:enter var(--t-quick) ease-out both}
+  .modal:not([hidden]) .sheet{animation:enter var(--t-quick) ease-out both}
+  @keyframes fall{from{transform:translateY(-30px)}to{transform:translateY(130px)}}
+  @keyframes flash{0%,88%,100%{opacity:0}90%,94%{opacity:.4}92%{opacity:.1}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+  @keyframes droop{0%,100%{transform:translateY(2px) scaleY(.96)}50%{transform:translateY(4px) scaleY(.93)}}
+  @keyframes breathe{0%,100%{transform:scale(1,.92)}50%{transform:scale(1.03,.96)}}
+  @keyframes sag{0%,100%{transform:rotate(4deg) translateY(3px) scale(1.03,.92)}50%{transform:rotate(5deg) translateY(4px) scale(1.04,.9)}}
+  @keyframes blink{50%{opacity:0}}
+  @keyframes rustle{0%,100%{transform:rotate(0)}50%{transform:rotate(3deg)}}
+  @keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}

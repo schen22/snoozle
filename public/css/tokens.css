@@ -1,0 +1,23 @@
+/* Snoozle's Garden: tokens (moved from index.html) */
+/* ── TOKENS ── */
+:root{
+  --bg:#e6edda; --surface:#fbfcf6; --ink:#22301f; --muted:#5d6b57; --line:#22301f;
+  --leaf:#4f8f43; --leaf2:#8fc66f; --grass:#9fcf7c; --grass2:#7db85c;
+  --sky:#bfe0ee; --sky-rain:#a9bccb; --sky-storm:#7f879c;
+  --sun:#f5c64a; --cloud:#ffffff; --cloud-dark:#d7dbe3; --drop:#4d86b8;
+  --heart:#e46a7c; --soil:#a9744a; --soil2:#7f5534; --body:#f6eab9;
+  --chip:#eef3e4; --on-leaf:#ffffff; --bolt:#ffffff; --scrim:rgba(10,16,10,.45); --face:#22301f;
+  --t-quick:150ms; --t-react:450ms; --ease-spring:cubic-bezier(.3,1.6,.5,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#162016; --surface:#212c20; --ink:#eef3e4; --muted:#a9b7a2; --line:#d9e4cf;
+    --leaf:#7cc06a; --leaf2:#a6d98a; --grass:#3f6a35; --grass2:#335a2b;
+    --sky:#2d4654; --sky-rain:#2a3540; --sky-storm:#1d222c;
+    --sun:#e8b93d; --cloud:#c9d2da; --cloud-dark:#7d8692; --drop:#8cbde6;
+    --heart:#f08597; --soil:#8a5f3d; --soil2:#5f3f27; --body:#efe0a6;
+    --chip:#2b3829; --on-leaf:#162016; --bolt:#ffffff;
+    color-scheme:dark;
+  }
+}
