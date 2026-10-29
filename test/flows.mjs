@@ -1,7 +1,7 @@
 // Browser flow gate. Append flows to `flows`: { name, run(page, url) } (throw to fail).
 import { serve, openAt, closeAll } from './helpers.mjs';
 
-const GREETING = 'Hi! I’m Snoozle. Thanks for stopping by! Any chance you want to hang out with me?';
+const GREETING = 'Hello, hello! I’m Snoozle. Thanks for stopping by! Any chance you want to hang out with me?';
 const HOME_LINE = 'What sounds nice right now?';
 const SCREENS = ['garden', 'recharge', 'moves', 'thoughts'];
 
@@ -111,7 +111,7 @@ export const flows = [
       assert(await page.$('.bond') && (await page.$eval('.bond', (n) => n.textContent.trim())), 'friendship line missing');
       assert((await page.$$eval('.menu button', (b) => b.length)) === 4, 'menu is not 4 buttons');
       assert(await page.$eval('.menu', (n) => getComputedStyle(n).gridTemplateColumns.split(' ').length) === 2, 'menu is not 2 columns');
-      assert(await page.$$eval('button[data-act=reset]', (b) => b.length && b[0].textContent.trim() === 'Reset prototype'), 'Reset prototype missing');
+      assert(await page.$$eval('button[data-act=reset]', (b) => b.length && b[0].textContent.trim() === 'Reset'), 'Reset missing');
       const got = await dialog(page);
       assert(got === GREETING, `greeting was "${got}"`);
     },
