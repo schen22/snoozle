@@ -59,7 +59,7 @@ Sections in this order, each behind a `// ── NAME ──` comment so an agen
 | Section | Holds | Rule |
 |---|---|---|
 | `TOKENS` (CSS) | Spec colour tokens, light + `prefers-color-scheme: dark` | Every colour is a variable; no hex outside this block |
-| `COPY` | Every user-visible string from the spec, as one object | Strings appear nowhere else in the script; the gate checks them against `spec/copy.json` |
+| `COPY` | Every user-visible string, in [`public/js/copy.js`](public/js/copy.js) by screen and situation | The source of truth for copy; strings appear nowhere else |
 | `STATE` | `newDay()` defaults + `day` object + `futureMoves` | Only `act()` mutates |
 | `STORE` | `store.load()` → lasting facts, `store.save(lasting)` | The only code that knows where data lives (v1: `localStorage`). `load` runs once at boot and may be async; `save` is fire-and-forget, so `act()` never waits on storage. Wrapped in try/catch; app works if storage throws |
 | `CLOCK` | Date check on load, `visibilitychange`, every 60 s | New date → `act('newDay')` |
@@ -331,13 +331,12 @@ over one `animation` property, and no `!important` is needed:
 
 | Command | Runs | Time |
 |---|---|---|
-| `npm run gate:fast` | Docs links (`check-docs.mjs`) · brotli budget · every `spec/copy.json` string present in `index.html` · no hex colour outside `TOKENS` · no digits in `COPY` except N, B and the stepper | < 2 s |
+| `npm run gate:fast` | Docs links (`check-docs.mjs`) · brotli budget (`index.html` + `public/js/*.js`) · sprite shapes · no hex colour outside `TOKENS` or in `copy.js` · no digits in `COPY` except N, B and the stepper | < 2 s |
 | `npm run gate` | `gate:fast` + puppeteer-core with installed Chrome at 320, 390, 460 px: no horizontal scroll, tap targets ≥ 44 px, **zero `pageerror` or console errors**, the spec's acceptance criteria as scripted flows (menu → screen → Back, skies, plant stages, teach past N, save/let go, Future moves survive reload, a corrupt `snoozle:v1` reads as empty, midnight reset with a faked clock) | < 30 s |
 | `npm run perf` | `npx lighthouse` (mobile preset, simulated Slow 4G) with the installed Chrome against the local server; prints FCP, LCP, CLS, score, bytes. Fonts load from Google for real | ~30 s, needs network for fonts; run at each milestone |
 
-`spec/copy.json` is extracted from the spec once, in M1, as `{key: string}`. A string with a placeholder
-(`{move}`, N, B, `{sky}`) is stored as its fixed fragments, and each fragment must appear. When the spec's copy
-changes, update `copy.json` in the same commit as `index.html`.
+Copy is edited in [`public/js/copy.js`](public/js/copy.js), which replaced the spec-mirror check
+(`spec/copy.json`, 2026-10-29).
 
 Not PageSpeed Insights: tested 2026-10-28, keyless calls fail on a shared daily quota, and it can't reach a page behind Access.
 

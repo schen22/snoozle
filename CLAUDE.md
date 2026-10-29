@@ -8,7 +8,7 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 
 1. Read [PLAN.md](PLAN.md): what's now, and every decision so far.
 2. Behaviour and copy: [Snoozle's Garden: Build Spec](https://claude.ai/artifact/9GVosVjYu739Cb4ncPLCQC)
-   (a Claude Doc; read it with the Claude Docs tools, never web-fetch). Copy is final: use it exactly, curly quotes.
+   (a Claude Doc; read it with the Claude Docs tools, never web-fetch). Copy lives in [`public/js/copy.js`](public/js/copy.js) (source of truth; curly quotes).
    Visual reference: [prototype](https://claude.ai/artifact/G8WajKiR8gzECqxB3Y7gGD). Spec wins over the prototype;
    [PLAN Decisions](PLAN.md#decisions) win over the spec.
 3. How it's built: [ARCHITECTURE §2 Code layout](ARCHITECTURE.md#2-code-layout-inside-indexhtml).
@@ -57,5 +57,7 @@ beyond the spec's acceptance criteria.
   every later step. One item per helper here, and gate scripts in their own lane.
 - 2026-10-29 · Chrome (puppeteer) can't start inside the Claude Code sandbox: run `node test/flows.mjs` /
   `npm run gate` with the sandbox off (approved for test commands only); say so in every lane brief.
-- 2026-10-29 · The static-checks lane used 75k reading the 24 KB spec to build `spec/copy.json`; now built, so
-  later lanes add fragments to it instead of re-reading the whole spec.
+- 2026-10-29 · The static-checks lane used 75k reading the 24 KB spec. Copy now lives in `public/js/copy.js`, so
+  lanes read that (188 lines), never the spec doc, for wording.
+- 2026-10-29 · Lanes that own different files ran side by side cleanly (copy lane + design review); everything in one
+  `index.html` forced serial work. Split by file before parallelising.

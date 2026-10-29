@@ -127,3 +127,6 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 - 2026-10-29 — **Moves copy says each number once** (game / product / content review): N in the hint, the usual in
   the stepper, feeling in Snoozle's lines. Cut the Recharge and Thoughts hints, "instead of your usual", and
   **"We usually carry about four"** (reverses Q4), and the Future moves hint while the list is empty.
+- 2026-10-29 — **Copy in one file**: `public/js/copy.js` (classic script, global `COPY`), grouped by screen with a
+  "when it shows" note per line. It is the source of truth; `spec/copy.json` and `check-copy` retired. Budget sums
+  `index.html` + `public/js/*.js` (15.6 KB brotli). CSP `script-src` adds `'self'`.
