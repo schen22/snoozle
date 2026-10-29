@@ -146,7 +146,7 @@ export const COPY = {
       },
       {
         k: "friend",
-        e: "📞",
+        e: "📲",
         t: "Phone a friend",
         s: "A quick hello counts",
         r: [
