@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
-const docs = ['CLAUDE.md', 'PLAN.md', 'ARCHITECTURE.md']
+const docs = ['CLAUDE.md', 'PLAN.md', 'ARCHITECTURE.md', 'README.md']
   .filter((f) => existsSync(join(root, f)));
 
 // GitHub-style heading slug: lowercase, drop punctuation (keeps word chars, spaces, hyphens), spaces → hyphens.
