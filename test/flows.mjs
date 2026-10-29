@@ -59,6 +59,31 @@ const CARDS = {
   pit: ['Good call. I’ll hold down the fort.', 'Bodies first, everything else after.'],
   outside: ['Fresh air! I’m rolling around in the grass.', 'Look at the sky with me for a sec.'],
 };
+const WANDER = 'The thought wandered back into the tall grass. You don’t have to catch every one.';
+const TAPS = ['Hi! I’m right here.', 'Hehe, that tickles.', 'You came to say hi? That’s the best.'];
+// [subline, question, [[option label, reply], ...]] per kind, in menu order
+const THOUGHTS = [
+  ['A should statement', 'Whose rule is that one, anyway?', [
+    ['Swap “should” for “could”', '‘I could…’ Feels lighter, right? Could means it’s a choice, not a debt.'],
+    ['Save it for Future moves', 'It doesn’t have to be today. Teach it to me later, or tuck it into Future moves.']]],
+  ['Running on empty', 'Pushing through works for one battle, not every day.', [
+    ['Recharge first', 'Let’s top up first. Pick anything here and I’ll do it with you.'],
+    ['Lighten today’s moves', 'Which move could wait? Saving one for later isn’t quitting.']]],
+  ['People-pleasing', 'Every yes to them is a no to something else, sometimes you.', [
+    ['Borrow a soft no', 'Try: ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.'],
+    ['Buy some time', 'Try: ‘Let me check and get back to you.’ You don’t owe an answer on the spot.']]],
+  ['Mind reading', 'Has anyone actually said that?', [
+    ['What would I tell a friend?', 'You’d tell them rest isn’t lazy. Same rules apply to you.'],
+    ['Check the evidence', 'If no one said it, it’s a guess, not a fact. Guesses can be wrong.']]],
+  ['All-or-nothing', 'Is there a good-enough middle?', [
+    ['Find the good-enough version', 'What would 70% look like? Good enough is still good.'],
+    ['Name one part that went okay', 'There’s always one. Even ‘I showed up’ counts.']]],
+  ['Fortune telling', 'What’s most likely, not worst?', [
+    ['Picture the most likely version', 'Most days land somewhere in the middle. This one probably will too.'],
+    ['One tiny step for the next hour', 'Just the next hour. What would help right now?']]],
+  ['That’s fine', 'Noticing it is enough. Thoughts are weather too.', [
+    ['Just sit with it a sec', 'Okay. I’ll sit here with you. No fixing needed.']]],
+];
 const caption = (page) => page.$eval('.today-garden p', (n) => n.textContent);
 const bondIdx = async (page) => BOND.indexOf(await page.$eval('.bond', (n) => n.textContent.trim()));
 const pickSky = (page, s) => tap(page, `button[data-act=sky][data-arg=${s}]`);
@@ -419,6 +444,100 @@ export const flows = [
       assert((await dialog(page)) === 'I learned <img src=x onerror=alert(1)>!', 'say line as text');
       await tap(page, '.move:nth-child(1) button[data-act=save]');
       assert((await page.$$('.daycare img')).length === 0, 'img in future');
+    },
+  },
+  {
+    name: 'thoughts: kinds, questions, options and replies',
+    async run(page, url) {
+      await boot(page, url);
+      for (let k = 0; k < THOUGHTS.length; k++) {
+        const [sub, q, opts] = THOUGHTS[k];
+        for (let o = 0; o <= opts.length; o++) {
+          await goto(page, 'thoughts');
+          await tap(page, `button[data-act=kind][data-arg="${k}"]`);
+          await page.waitForFunction(() => !document.querySelector('.modal').hidden);
+          const said = await page.$eval('#msay', (n) => n.textContent);
+          assert(said === `Looks like ${sub.toLowerCase()}. ${q}`, `kind ${k} pop-up was "${said}"`);
+          const labels = await page.$$eval('.modal .opts button', (b) => b.map((n) => n.textContent));
+          const want = [...opts.map((x) => x[0]), 'Let it wander off'];
+          assert(JSON.stringify(labels) === JSON.stringify(want), `kind ${k} options ${JSON.stringify(labels)}`);
+          await tap(page, `.modal .opts button:nth-child(${o + 1})`);
+          const reply = o < opts.length ? opts[o][1] : WANDER;
+          const got = await dialog(page);
+          assert(got === reply, `kind ${k} option ${o} reply "${got}"`);
+        }
+      }
+    },
+  },
+  {
+    name: 'thoughts: options that open a screen keep their own line',
+    async run(page, url) {
+      await boot(page, url);
+      for (const [k, o, screen] of [[0, 1, 'moves'], [1, 0, 'recharge'], [1, 1, 'moves'], [5, 1, 'recharge']]) {
+        await goto(page, 'thoughts');
+        await tap(page, `button[data-act=kind][data-arg="${k}"]`);
+        await tap(page, `.modal .opts button:nth-child(${o + 1})`);
+        await page.waitForFunction((s) => state.screen === s && document.querySelector('.modal').hidden, {}, screen);
+        const label = THOUGHTS[k][2][o][0];
+        const got = await dialog(page);
+        assert(got === THOUGHTS[k][2][o][1], `${label}: dialog "${got}"`);
+        assert(await visible(page, screen === 'moves' ? '.moves' : '.camp'), `${label}: ${screen} not shown`);
+        await tap(page, 'button[data-act=home]');
+      }
+    },
+  },
+  {
+    name: 'thoughts: form clears, friendship once per kind',
+    async run(page, url) {
+      await boot(page, url);
+      const bond = () => page.evaluate(() => state.bond.size);
+      const type = (t) => page.$eval('#thought', (n, v) => { n.value = v; }, t);
+      assert((await bond()) === 0, 'friendship not 0 at start');
+      await goto(page, 'thoughts');
+      await type('first');
+      await tap(page, 'button[data-act=kind][data-arg="2"]');
+      assert((await bond()) === 0, 'choosing a kind alone added friendship');
+      await tap(page, '.modal .opts button:nth-child(1)');
+      assert((await page.$eval('#thought', (n) => n.value)) === '', 'form not cleared');
+      assert((await bond()) === 1, 'first choice should add 1');
+      await goto(page, 'thoughts');
+      await type('again');
+      await tap(page, 'button[data-act=kind][data-arg="2"]');
+      await tap(page, '.modal .opts button:nth-child(2)');
+      assert((await page.$eval('#thought', (n) => n.value)) === '', 'form not cleared the second time');
+      assert((await bond()) === 1, 'same kind added again');
+      await goto(page, 'thoughts');
+      await tap(page, 'button[data-act=kind][data-arg="3"]');
+      await tap(page, '.modal .opts button:nth-child(3)'); // wander off
+      assert((await bond()) === 2, 'a different kind (wander) should add 1');
+    },
+  },
+  {
+    name: 'thoughts: typed text is inert',
+    async run(page, url) {
+      await boot(page, url);
+      const bs = () => page.$$eval('b', (n) => n.length);
+      const before = await bs();
+      await goto(page, 'thoughts');
+      await page.$eval('#thought', (n) => { n.value = '<b>x</b>'; });
+      await tap(page, 'button[data-act=kind][data-arg="6"]');
+      assert((await bs()) === before, 'b element created at pop-up');
+      await tap(page, '.modal .opts button:nth-child(1)');
+      await dialog(page);
+      assert((await bs()) === before, 'b element created after choice');
+      assert((await page.$eval('#thought', (n) => n.value)) === '', 'typed text kept');
+      assert(!(await page.content()).includes('<b>x</b>'), 'typed markup reached the page');
+    },
+  },
+  {
+    name: 'tap Snoozle: hello line and one heart',
+    async run(page, url) {
+      await boot(page, url);
+      await page.$eval('#buddy', (n) => n.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+      const hearts = await page.$$eval('.fl', (n) => n.map((x) => x.textContent));
+      assert(hearts.length === 1 && hearts[0] === '💗', `floats ${JSON.stringify(hearts)}`);
+      const got = await dialog(page);
+      assert(TAPS.includes(got), `tap line "${got}"`);
     },
   },
 ];
