@@ -16,7 +16,7 @@
   --sky:#bfe0ee; --sky-rain:#a9bccb; --sky-storm:#7f879c;
   --sun:#f5c64a; --cloud:#ffffff; --cloud-dark:#d7dbe3; --drop:#4d86b8;
   --heart:#e46a7c; --soil:#a9744a; --soil2:#7f5534; --body:#f6eab9;
-  --chip:#eef3e4; --on-leaf:#ffffff; --bolt:#ffffff; --scrim:rgba(10,16,10,.45);
+  --chip:#eef3e4; --on-leaf:#ffffff; --bolt:#ffffff; --scrim:rgba(10,16,10,.45); --face:#22301f;
   --t-quick:150ms; --t-react:450ms; --ease-spring:cubic-bezier(.3,1.6,.5,1);
   color-scheme:light;
 }
@@ -75,7 +75,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .a-nap .zz{opacity:1}
 .zz{opacity:0;fill:var(--ink);font:700 14px "Nunito",sans-serif}
 .mouth-strain,.brows,.sweat{display:none}
-.sweat{fill:var(--sky);stroke:var(--line);stroke-width:1.5}
+.sweat{fill:var(--sky);stroke:var(--face);stroke-width:1.5}
 #scene.heavy .mouth-strain,#scene.heavy .brows,#scene.heavy .sweat{display:inline}
 #scene.heavy .mouth-happy{display:none}
 .umbrella{opacity:0;transform-box:fill-box;transform-origin:5% 100%;transform:scale(.2)}
@@ -250,19 +250,19 @@ h2{font-size:18px;font-weight:800;margin:24px 2px 10px}
           <ellipse class="b-body b-line" cx="0" cy="-28" rx="28" ry="27"/>
           <g id="strap"></g>
           <g class="eyes-open">
-            <circle cx="-9" cy="-31" r="4" fill="var(--line)"/>
-            <circle cx="9" cy="-31" r="4" fill="var(--line)"/>
+            <circle cx="-9" cy="-31" r="4" fill="var(--face)"/>
+            <circle cx="9" cy="-31" r="4" fill="var(--face)"/>
             <circle cx="-7.5" cy="-32.5" r="1.3" fill="var(--body)"/>
             <circle cx="10.5" cy="-32.5" r="1.3" fill="var(--body)"/>
           </g>
           <g class="eyes-closed">
-            <path d="M-14 -30 q5 4 10 0 M4 -30 q5 4 10 0" stroke="var(--line)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M-14 -30 q5 4 10 0 M4 -30 q5 4 10 0" stroke="var(--face)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
           </g>
           <ellipse class="b-cheek" cx="-17" cy="-22" rx="5" ry="3"/>
           <ellipse class="b-cheek" cx="17" cy="-22" rx="5" ry="3"/>
-          <path class="mouth-happy" d="M-4 -21 q4 4 8 0" stroke="var(--line)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path class="mouth-strain" d="M-6 -20 q2 -2 4 0 q2 2 4 0 q2 -2 4 0" stroke="var(--line)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path class="brows" d="M-15 -37 L-6 -40 M15 -37 L6 -40" stroke="var(--line)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path class="mouth-happy" d="M-4 -21 q4 4 8 0" stroke="var(--face)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path class="mouth-strain" d="M-6 -20 q2 -2 4 0 q2 2 4 0 q2 -2 4 0" stroke="var(--face)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path class="brows" d="M-15 -37 L-6 -40 M15 -37 L6 -40" stroke="var(--face)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
           <path class="sweat" d="M-25 -50 Q-30 -42 -25 -39 Q-20 -42 -25 -50 Z"/>
           <text class="zz" x="26" y="-56">z z</text>
         </g></g></g>
