@@ -14,8 +14,8 @@
 //   - Companion, not coach: no "should", no "Try:", no strings of orders. Offer, ask, or say "Let’s".
 //   - Every weather is equal: no "sunnier", "better" or "worse". No numbers or percentages.
 //   - Bubbles: three short sentences at most. Choice buttons: five words at most. No irony.
-// Loaded as a classic script before the page script, so COPY is a global.
-const COPY = {
+// An ES module: js/state.js, js/actions.js and the view files import COPY from here.
+export const COPY = {
   // Whole app: name tag on every dialog bubble, including the pop-up sheet
   tag: "SNOOZLE",
   // Whole app: screen-reader label for the scene picture

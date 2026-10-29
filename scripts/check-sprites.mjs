@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Sprite check: every SVG shape in reference/prototype.html appears in public/index.html with the same tag
+// Sprite check: every SVG shape in reference/prototype.html appears in public/index.html or public/js/** with the same tag
 // and geometry attributes (compared as attribute sets). Attributes whose value uses ${…} are ignored.
 // Usage: node scripts/check-sprites.mjs → matched/missing counts; exit 1 on any missing.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
@@ -19,7 +19,10 @@ const shapes = (src) => {
   return out;
 };
 const proto = shapes(readFileSync(join(root, 'reference/prototype.html'), 'utf8'));
-const page = new Set(shapes(readFileSync(join(root, 'public/index.html'), 'utf8')).map((s) => s.key));
+// The page's shapes live in index.html (the scene) and in SVG strings under public/js/.
+const js = readdirSync(join(root, 'public/js'), { recursive: true }).filter((f) => f.endsWith('.js')).map((f) => join(root, 'public/js', f));
+const src = [join(root, 'public/index.html'), ...js].map((f) => readFileSync(f, 'utf8')).join('\n');
+const page = new Set(shapes(src).map((s) => s.key));
 const missing = proto.filter((s) => !page.has(s.key));
 console.log(`sprites: ${proto.length - missing.length} matched, ${missing.length} missing`);
 for (const m of missing.slice(0, 5)) console.log(`  missing ${m.raw}`);

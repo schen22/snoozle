@@ -477,7 +477,7 @@ export const flows = [
         await goto(page, 'thoughts');
         await tap(page, `button[data-act=kind][data-arg="${k}"]`);
         await tap(page, `.modal .opts button:nth-child(${o + 1})`);
-        await page.waitForFunction((s) => state.screen === s && document.querySelector('.modal').hidden, {}, screen);
+        await page.waitForFunction((s) => window.__snoozle.state.screen === s && document.querySelector('.modal').hidden, {}, screen);
         const label = THOUGHTS[k][2][o][0];
         const got = await dialog(page);
         assert(got === THOUGHTS[k][2][o][1], `${label}: dialog "${got}"`);
@@ -490,7 +490,7 @@ export const flows = [
     name: 'thoughts: form clears, friendship once per kind',
     async run(page, url) {
       await boot(page, url);
-      const bond = () => page.evaluate(() => state.bond.size);
+      const bond = () => page.evaluate(() => window.__snoozle.state.bond.size);
       const type = (t) => page.$eval('#thought', (n, v) => { n.value = v; }, t);
       assert((await bond()) === 0, 'friendship not 0 at start');
       await goto(page, 'thoughts');
@@ -736,7 +736,7 @@ export const flows = [
         pressed: [...document.querySelectorAll('button[data-act=sky]')].filter((b) => b.getAttribute('aria-pressed') === 'true').length,
         bundles: document.querySelectorAll('#pack .bundle').length,
         cared: document.querySelectorAll('.cbtn.together').length,
-        moves: state.moves.length, heavy: document.getElementById('scene').classList.contains('heavy'),
+        moves: window.__snoozle.state.moves.length, heavy: document.getElementById('scene').classList.contains('heavy'),
       }));
       assert(st.sky.startsWith('w-none') && !st.heavy && st.pressed === 0, 'sky still selected: ' + JSON.stringify(st));
       assert(st.bundles === 0 && st.moves === 0, 'backpack not empty: ' + JSON.stringify(st));
