@@ -5,8 +5,9 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Now
 
-- [ ] M1 Shell — `index.html` from the prototype, tokens, scene, Home + menu + Back, dialog, clock,
-      `spec/copy.json`, gates (`budget.mjs`, copy check, puppeteer flows), first Pages deploy, `npm run perf`.
+- [ ] M2 Care — Garden (skies, rain, leaf shelter, plant stages) and Recharge Center to spec; flows for their
+      acceptance criteria.
+- [ ] `npm run perf` (Lighthouse) — not built yet; first numbers due with M2.
 
 ## Next
 
@@ -38,6 +39,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Done
 
+- 2026-10-29 — M1 Shell: `public/index.html` restructured to the architecture (807 lines, 14.3 KB brotli);
+  `npm run gate` = docs, budget, copy 168/168, sprites 54/54, tokens, browser flows 7/7.
 - 2026-10-29 — M0 Plan: all open questions answered; ARCHITECTURE approved.
 - 2026-10-28 — M0 docs: `CLAUDE.md`, `PLAN.md`, `ARCHITECTURE.md`, docs gate; spec doc renamed to Snoozle's Garden.
 
@@ -81,3 +84,10 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   no thought log, and friendship resets daily.
 - 2026-10-29 — Q2: `usual` not stored, resets to 4 daily; pattern tracking of moves by weather goes to Later.
   Q4: keep "about four". Q6: no support link.
+- 2026-10-29 — M1 deviations accepted: extra facts `seq` (per-day move id counter) and `cared` as a card → tap-count
+  Map (alternating replies); `newDay` cancels only script animations (a cancelled CSS loop wouldn't restart);
+  "carrying more than N" uses unfinished moves; thought friendship keyed by kind (fresh-eyes finding, max 16/day).
+- 2026-10-29 — Browser tests run outside the sandbox (Chrome can't start in it), approved by Sarah for the test
+  commands only. Project `.claude/settings.json` exemption: Sarah to create (Claude's write was blocked).
+- 2026-10-29 — First Haiku fresh-eyes pass (M1): 93k tokens; found 1 rule break Gate 1 missed (thought friendship
+  farmable) + 1 minor. Evidence for the setup audit.

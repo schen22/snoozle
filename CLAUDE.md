@@ -54,3 +54,7 @@ beyond the spec's acceptance criteria.
 - 2026-10-29 · Lane M1 hit 158k tokens in 16 tool calls before writing any gate. Its brief had two big items
   (restructure the 789-line prototype + five gate scripts), and each rewrite of the whole file rode along on
   every later step. One item per helper here, and gate scripts in their own lane.
+- 2026-10-29 · Chrome (puppeteer) can't start inside the Claude Code sandbox: run `node test/flows.mjs` /
+  `npm run gate` with the sandbox off (approved for test commands only); say so in every lane brief.
+- 2026-10-29 · The static-checks lane used 75k reading the 24 KB spec to build `spec/copy.json`; now built, so
+  later lanes add fragments to it instead of re-reading the whole spec.

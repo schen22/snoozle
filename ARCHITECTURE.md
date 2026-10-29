@@ -105,8 +105,8 @@ can't drift.
 | `line` | the highest friendship line reached | — |
 
 `bond` is a set of distinct acts, each keyed with its date: `<date>:sky` (first pick of the day),
-`<date>:care:<card>` (first tap of each card), and `<date>:thought:<n>` (each thought named). v1 only ever holds
-today's keys, but the date prefix means days from a loaded code or a server merge by set union, with no migration. A day reaches at most 1 + 8 + thoughts. Repeat taps still water the plant and
+`<date>:care:<card>` (first tap of each card), and `<date>:thought:<kind>` (first thought of each kind, 7 kinds). v1 only ever holds
+today's keys, but the date prefix means days from a loaded code or a server merge by set union, with no migration. A day reaches at most 1 + 8 + 7 = 16. Repeat taps still water the plant and
 get Snoozle's alternating replies (the spec's soft limits), but they don't buy friendship. This needs Sarah's
 yes, since the spec says every tap adds 1 ([Q9](#10-open-questions)).
 
