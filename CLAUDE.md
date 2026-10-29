@@ -33,7 +33,8 @@ Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.m
 - Stored: Future moves only (`localStorage` `snoozle:v1`). Nothing else persists ([ARCHITECTURE §3](ARCHITECTURE.md#3-state)).
 - Load: ≤ 20 KB brotli HTML, LCP ≤ 2.0 s on Slow 4G ([ARCHITECTURE §5](ARCHITECTURE.md#5-load-time)).
 - Mobile first: no horizontal scroll from 320 px, tap targets ≥ 44 px, inputs 16 px, safe-area padding.
-- Animation: CSS classes only; state never waits on an animation ([ARCHITECTURE §6](ARCHITECTURE.md#6-animation-audit)).
+- Sprites: keep the prototype's SVG shapes as drawn ([reference/prototype.html](reference/prototype.html)); redraws are deliberate.
+- Animation: loops are CSS classes, one-shots `el.animate()`; state never waits on an animation ([ARCHITECTURE §6](ARCHITECTURE.md#6-animation-audit)).
 - User text goes into the page with `textContent`, never `innerHTML`.
 - Not in v1: renaming, the spec's accessibility section ([PLAN Later](PLAN.md#later)).
 - No screenshots in helpers; compare computed values. Visual sign-off is Sarah's.

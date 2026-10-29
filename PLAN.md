@@ -46,3 +46,11 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
   CSP + Access option, zero-console-error gate, `copy.json` placeholder rule, iOS keyboard and tab-discard risk.
   Lowest after round 2: UX 88, because a refresh wipes the day (accepted risk, [Q3](ARCHITECTURE.md#10-open-questions)).
 - 2026-10-28 — Perf check is local `npx lighthouse`, not PageSpeed Insights (keyless API hit a shared daily quota).
+- 2026-10-29 — Animation expert + game design engineer reviewed the animation audit and the state model:
+  round 1 **76 / 72** → round 2 **91 / 90**. Changes: state holds facts only, with water/N/stage/heavy/friendship derived;
+  `act()` pipeline diffs before/after to choose effects; friendship = distinct acts (Q9); moves get ids;
+  thought → screen keeps the thought's line; `newDay` cancels sheets, typer and animations; nested motion groups
+  with reaction priority (relief > sit > hop) and Web Animations one-shots; strain softened (Q10); typer no longer
+  spams `aria-live`; dim lightning.
+- 2026-10-29 — **Prototype sprites kept as drawn** ([reference/prototype.html](reference/prototype.html)); a gate check in M1
+  fails if any SVG shape changes without updating the reference.

@@ -40,9 +40,9 @@ flowchart LR
   C[clock: load, visibilitychange, 60 s] -- new date --> A
 ```
 
-One page, one script. Every user action goes through `act()`, which changes state, then calls `render()` and
-fires at most one effect. Nothing changes outside `act()`, which is how "every tap gets immediate, visible
-feedback" stays true.
+One page, one script. Every user action goes through `act()`. It derives the view before and after the change,
+renders, then picks effects by comparing the two ([§3](#action-pipeline)). Nothing changes outside `act()`, which
+is how "every tap gets immediate, visible feedback" stays true.
 
 | Choice | Why | Wrong if… (then) |
 |---|---|---|
@@ -63,8 +63,17 @@ Sections in this order, each behind a `// ── NAME ──` comment so an agen
 | `CLOCK` | Date check on load, `visibilitychange`, every 60 s | New date → `act('newDay')` |
 | `ACT` | One function per action in the spec tables | Returns nothing; ends with `render()` |
 | `RENDER` | Scene, backpack, friendship line, panel per screen | Built with a 10-line `el(tag, attrs, ...kids)` helper: user text becomes text nodes, never `innerHTML`. Each screen's skeleton (headings, inputs) is built once; `render()` replaces only its lists and labels, so a typed draft and keyboard focus survive every action |
-| `FX` | Hop, hearts, ✨, phew, strain, menu morph | Respects `prefers-reduced-motion` (cheap to keep; spec behaviour) |
-| `DIALOG` | Typer (18 ms/char), tap to skip, `▾` | One typer at a time; a new line cancels the old |
+| `FX` | Body reactions, particles, plant pop ([§6](#motion-system)) | One `play()` wrapper: Web Animations for one-shots, CSS classes for loops; returns at once with reduced motion |
+| `DIALOG` | Typer (18 ms/char), tap to skip, `▾` | One typer at a time; a new line cancels the old. Types into an `aria-hidden` span; the full line goes to a visually hidden `aria-live` span once |
+
+**Sprites are kept from the prototype as drawn.** The scene (sky, sun, clouds, bolt, ground, tufts, leaf shelter),
+Snoozle (body, leaves, feet, open/closed eyes, cheeks, happy/strain mouths, brows, sweat, "z z"), the backpack and
+bundles, and the four plant stages (`plantSVG()`) are copied with their paths, coordinates and class names
+unchanged. The only structural change: Snoozle's parts move from `#buddy-inner` into the nested motion groups
+([§6](#motion-system)), with no shape edited. Source of truth: [reference/prototype.html](reference/prototype.html)
+(version `1793255127-8d01`, sha256 `b1ecc2e4…`). `gate:fast` checks that every SVG shape in the prototype
+(element + geometry attributes) still appears in `index.html`, so a redraw has to be deliberate: update the
+reference in the same commit and say why.
 
 Events: one delegated `click` listener reads `data-act="…"` and `data-arg="…"`; Enter in the move input = Teach.
 The move input calls `scrollIntoView({block: "center"})` on focus so the iPhone keyboard doesn't hide it. With
@@ -72,11 +81,52 @@ renaming gone, no bottom sheet holds an input. Avoid `100vh`, because iOS toolba
 
 ## 3. State
 
-| Field | Lives | Reset |
+State holds **facts only**. Anything that can be computed from them is derived on every render, never stored, so it
+can't drift.
+
+| Fact | Lives | Reset |
 |---|---|---|
 | `date` (YYYY-MM-DD, local) | memory | new day |
-| `sky`, `water`, `tapped` (Recharge cards), `moves` (`{text, used}`), `friendship`, `usual` (B, default 4), `screen` | memory | new day and on refresh |
+| `sky` (or none), `care` (Recharge taps today), `cared` (set of cards tapped), `moves` (`{id, text, used}`), `bond` (set of distinct acts, below), `usual` (B, default 4), `screen`, `sheet` (open pop-up or none) | memory | new day and on refresh |
 | `futureMoves` (array of strings, ≤ 40 chars each) | memory + `localStorage` key `snoozle:v1` as `{"v":1,"future":[…]}` | never automatically; only "Let go" or "Bring back" removes one |
+
+### Derived values
+
+| Value | Formula | Replaces |
+|---|---|---|
+| `water` | sky water (sunny/cloudy 1, drizzly/stormy 2, none 0) + `care` | Swapping water on a sky change: changing `sky` is enough |
+| `stage` | seed 0 · sprout 1–2 · bud 3–4 · bloom ≥ 5 | — |
+| `N` | spec table from `sky` and `usual` (no sky → B) | — |
+| `unfinished` | moves not used | — |
+| `heavy` | `unfinished > N` | Strain on/off, pink borders |
+| `friendship` | size of `bond` | A counter that tapping can farm |
+| `line` | the highest friendship line reached | — |
+
+`bond` is a set of distinct acts: `sky` (first pick of the day), `care:<card>` (first tap of each card), and
+`thought:<n>` (each thought named). A day reaches at most 1 + 8 + thoughts. Repeat taps still water the plant and
+get Snoozle's alternating replies (the spec's soft limits), but they don't buy friendship. This needs Sarah's
+yes, since the spec says every tap adds 1 ([Q9](#10-open-questions)).
+
+### Action pipeline
+
+```text
+act(type, arg):
+  before = derive(state)
+  REDUCERS[type](state, arg)        // mutate facts only
+  after  = derive(state)
+  render(after)                     // same frame as the tap
+  say(lineFor(type, arg, before, after))
+  fx(effectsFor(type, before, after))
+```
+
+- `effectsFor` is a pure function: one **body reaction** (highest priority wins, [§6](#motion-system)) plus any
+  **accents**: 💗/💤/💞 particles, ✨, plant pop when `after.stage > before.stage`, friendship-line flash when
+  `after.line > before.line`. The gate tests it without a browser.
+- `lineFor` picks one line per action. A stage-up appends " Look, our plant grew!". A thought option that opens
+  another screen keeps its own line, so the screen's intro line is skipped for that navigation (`go(screen, {quiet:true})`).
+- Moves carry an `id` from a counter, so duplicates ("walk" twice) stay distinct in "Which one can wait?".
+- `newDay` and "Reset prototype": close any sheet, cancel the typer and every running animation
+  (`document.getAnimations()`), then reset facts and greet.
 
 - **Not stored, by decision:** name (no renaming), friendship (6 lines, reachable within one day), usual, the day.
 - **Consequence:** a mid-day refresh or a phone closing the tab returns to the first-visit greeting with an empty
@@ -166,16 +216,37 @@ prototype.
 | Plant pop + ✨ | 1 keyframe, class reset | High: the reward for care | Keep |
 | Floating 💗 💤 💞 💨 "phew~" | One spawn helper + 1.6 s removal timer | Medium | Keep; one `float(emoji, at)` helper, ≤ 4 at once |
 | Backpack bundle pop | 1 keyframe | Medium | Keep |
-| Strain (infinite tremble + face swap) | 1 keyframe + 3 SVG parts shown | High: the only sign of going over N besides the border | Keep the face swap; tremble is optional if it looks busy |
+| Strain (face swap + 0.35 s linear tremble, infinite) | 1 keyframe + 3 SVG parts shown | High for the face; the endless fast shaking reads as agitation to a burnt-out audience | **Change ★**: face swap stays while heavy; a 1.2 s tremble when crossing over N; then a slow sag loop (2.4 s ease-in-out) |
 | Relief stretch | 1 keyframe | High: "doing less earns the warmest reaction" | Keep |
 | Sit-down breather (1.3 s) | 1 keyframe | Low–medium | Keep: costs nothing |
+| Lightning flash every 5 s | 1 keyframe | Medium | Keep: 0.2 flashes/s is well under the 3/s seizure limit; dim it (white at ≤ 40 % opacity); off with reduced motion |
 | Friendship line flash | 1 keyframe | Medium | Keep |
 | Tall-grass rustle (Thoughts) | 1 keyframe | Low | Keep only if free; first to cut |
 | Bottom-sheet pop-ups | CSS transform | Medium | Keep at 200 ms, no JS timing |
 
-Effect: about 30 fewer lines, no JS layout measuring, and every screen opens on the same frame as the tap. All
-remaining motion is CSS classes added by `FX`. Each one keeps working with reduced motion, because state never
-waits on an animation.
+Effect: about 30 fewer lines, no JS layout measuring, and every screen opens on the same frame as the tap. Each
+animation keeps working with reduced motion, because state never waits on an animation.
+
+### Motion system
+
+Snoozle is drawn as nested SVG groups, one job each. Their transforms compose, so a loop and a one-shot never fight
+over one `animation` property, and no `!important` is needed:
+
+| Group | Animates | How | Interrupted by |
+|---|---|---|---|
+| `#buddy` | Position in the scene | static | — |
+| `#buddy-idle` | Weather loop (bounce, sway, droop, breathe) | CSS class from `sky` | Paused while `heavy` (sag replaces it) |
+| `#buddy-pose` | Heavy sag loop + face swap | CSS class from `heavy` | — |
+| `#buddy-react` | One-shots: relief 3 > sit 2 > hop 1 | `el.animate()` | A reaction of equal or higher priority replaces it; a lower one is dropped (its accents still play). Relief is never cut short by a hop |
+
+- One-shots use the Web Animations API: they restart without reflow hacks, and `newDay` can cancel them. Loops stay
+  CSS classes set by `render()`.
+- Every body keyframe starts and ends at identity, so a replacement starts from rest.
+- Animate `transform` and `opacity` only, with `transform-box: fill-box` on each group.
+- Timing tokens in `:root`: `--t-quick: 150ms` (UI fades), `--t-react: 450ms` (hop), `--ease-spring:
+  cubic-bezier(.3,1.6,.5,1)` (pops). Tune feel in one place.
+- Particles: at most 4 on screen, spawned by one `float(emoji, at)` helper and removed when their animation finishes.
+  Never 💧 near Snoozle.
 
 ## 7. Gates
 
@@ -202,7 +273,7 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | Milestone | Scope | Done when |
 |---|---|---|
 | M0 Plan | `CLAUDE.md`, `PLAN.md`, this doc, expert review, repo | Sarah approves this doc |
-| M1 Shell | `index.html` from the prototype; tokens; scene + Snoozle SVG; Home, menu, Back; dialog typer; clock; `spec/copy.json`; gates; Pages deploy | Home works on a phone at the Pages URL; gate passes; perf printed |
+| M1 Shell | `index.html` from the prototype; tokens; scene + Snoozle sprites kept as drawn (sprite check in the gate); Home, menu, Back; dialog typer; clock; `spec/copy.json`; gates; Pages deploy | Home works on a phone at the Pages URL; gate passes; perf printed |
 | M2 Care | Garden (skies, rain, leaf shelter, plant stages) and Recharge Center; friendship line | Their acceptance criteria pass in `gate` |
 | M3 Moves | Move tutor, backpack and strain, pop-ups, Future moves + storage | Teach past N never blocks; Future moves survive reload |
 | M4 Thoughts | Thoughts screen and its routes into Recharge/Moves; tap Snoozle; final perf | Every spec acceptance criterion (minus renaming and accessibility) passes |
@@ -230,3 +301,5 @@ installed Chrome, no browser download). No screenshots in helpers; visual sign-o
 | 6 | A gentle support link for crisis days (spec risk) | Not in v1 | — |
 | 7 | Cut the menu morph and cursor blink (spec "Selecting an option", [§6](#6-animation-audit))? | Yes: instant swap + 150 ms fade | M1 |
 | 8 | Should the page itself be private (Cloudflare Access, [§4](#4-hosting-and-cost)) or public by URL? | Private with Access | M1 deploy |
+| 9 | Friendship from distinct acts only ([§3](#derived-values))? With the daily reset, drop the "35 · every kind of weather" line (a multi-day claim) and keep 0/2/6/12/20? | Yes to both | M2 |
+| 10 | Soften strain to a short tremble, then a slow sag ([§6](#6-animation-audit))? | Yes | M3 |
