@@ -10,14 +10,13 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Next
 
-- [ ] **Sarah:** push the repo (no `origin` yet; `schen22/snoozle` doesn't exist on GitHub as of 2026-10-29):
-      `gh repo create schen22/snoozle --private --source=. --remote=origin --push`.
 - [ ] **Sarah:** connect Cloudflare Pages to `schen22/snoozle` (Workers & Pages → Create → Pages → Connect to Git;
       build command none, output directory `public`).
 - [ ] **Sarah:** rename the folder `~/Documents/projects/greninja` → `snoozle` (`mv`), then start new sessions there.
 - [ ] Update the spec doc for the decisions below (no renaming, storage, accessibility deferred, menu morph,
       moves cap counts used moves, new "Used it" line, screen titles cut, Back top + bottom, Moves order,
-      Thoughts opening line and hints, one Back + back gesture, Moves copy said once, Recharge/Thoughts hints cut).
+      Thoughts opening line and hints, one Back + back gesture, Moves copy said once, Recharge/Thoughts hints cut,
+      six Recharge cards and their length limits, `BOND_AT` recut, the content and CBT review strings).
 - [ ] `test/flows.mjs` takes expected copy from `COPY` (load [`copy.js`](public/js/copy.js)) instead of ~15 literal
       strings, so a copy edit doesn't break tests (2026-10-29 voice pass: 3 failures, one already stale).
 
@@ -51,6 +50,8 @@ Milestones **M0 Plan** → **M1 Shell** → **M2 Care** → **M3 Moves** → **M
 
 ## Done
 
+- 2026-10-29 — Recharge cut to six cards; friendship lines fit one day; content and CBT review applied; gates for
+  card text, choice buttons (≤ five words) and friendship reachability. Repo pushed to `schen22/snoozle`.
 - 2026-10-29 — **v1 done** (M1–M4). `npm run gate`: copy 168/168, sprites 54/54, flows 29/29, 14.3 KB brotli.
   `npm run perf` ×3: FCP 0.94–0.98 s, LCP 0.94–1.01 s, CLS 0.087, score 98. Gate 2 Sonnet batch review: SHIP.
 - 2026-10-29 — M4 Thoughts + acceptance: all 7 kinds, screen routes, tap Snoozle, reduced motion, no digits,
