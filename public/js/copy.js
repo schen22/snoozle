@@ -275,8 +275,7 @@ const COPY = {
   // THOUGHTS: name a passing thought and pick a way to hold it
   thoughts: {
     // Snoozle on arriving at Thoughts
-    intro:
-      "Rustle, rustle… a wild thought appeared! Let’s name it together.",
+    intro: "Rustle, rustle… a wild thought appeared! Let’s name it together.",
     // Label above the thought box
     label: "What’s the thought?",
     // Small tag after that label
