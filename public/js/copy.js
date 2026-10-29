@@ -50,8 +50,8 @@ export const COPY = {
     "Snoozle is peeking at you from behind a leaf.",
     "Snoozle is warming up to you.",
     "Snoozle hums a little when you’re around.",
-    "Snoozle follows you everywhere now.",
-    "Snoozle falls asleep right next to you. Total trust.",
+    "Snoozle stays close beside you.",
+    "Snoozle falls asleep right next to you.",
     "You and Snoozle have been through every kind of weather together.",
   ],
 
@@ -150,7 +150,7 @@ export const COPY = {
         t: "Phone a friend",
         s: "A quick hello counts",
         r: [
-          "I love hearing your friend’s voice. You sound lighter.",
+          "I love hearing your friend’s voice. My leaves are swaying along.",
           "My roots feel steadier already. We don’t have to carry it all alone.",
         ],
       },
@@ -201,7 +201,7 @@ export const COPY = {
     introLow: (sky) =>
       `${sky} weather. Let’s keep it light today. Smaller is braver than it looks.`,
     // Snoozle on arriving at Moves otherwise
-    introOk: "Clear enough for a full pack. Pick the ones that matter most.",
+    introOk: "A full pack feels fine today. Which ones feel good to carry?",
     // Empty slot in the grid
     dash: "—",
     // Button label on an unfinished move
@@ -234,10 +234,10 @@ export const COPY = {
     // Reply after tapping Used it (alternates)
     used: [
       "Nice! That one’s done. My leaves did a little wiggle.",
-      "Move used! Take a breath before the next one.",
+      "Move used! Nice and steady.",
     ],
     // Reply after tapping Save for later
-    saved: (m) => `${m} is saved in Future moves. It’ll wait.`,
+    saved: (m) => `${m} is waiting in Future moves. Ahh, lighter already.`,
     // Heading of the Future moves list
     future: "Future moves",
     // Hint under the Future moves heading, shown when the list has moves
@@ -293,7 +293,7 @@ export const COPY = {
       {
         t: "“I can push through”",
         s: "Running on empty",
-        q: "Pushing through works for one battle, not every day.",
+        q: "Has pushing through been working lately?",
         opts: [
           {
             label: "Recharge first",
@@ -328,7 +328,7 @@ export const COPY = {
         q: "Has anyone actually said that?",
         opts: [
           {
-            label: "What would I tell a friend?",
+            label: "What I’d tell a friend",
             say: "You’d tell them rest isn’t lazy. I’m telling you the same.",
           },
           {
@@ -338,7 +338,7 @@ export const COPY = {
         ],
       },
       {
-        t: "“If it’s not perfect, it doesn’t count”",
+        t: "“It has to be perfect”",
         s: "All-or-nothing",
         q: "Is there a good-enough middle?",
         opts: [
@@ -347,22 +347,22 @@ export const COPY = {
             say: "What would mostly done look like? Good enough is still good.",
           },
           {
-            label: "Name one part that went okay",
+            label: "Name one okay part",
             say: "There’s always one. Even ‘I showed up’ counts.",
           },
         ],
       },
       {
-        t: "“It’s all going to go wrong”",
+        t: "“It’ll all go wrong”",
         s: "Fortune telling",
         q: "What’s most likely, not worst?",
         opts: [
           {
             label: "Picture the most likely version",
-            say: "Most days land somewhere in the middle. This one probably will too.",
+            say: "What happened the last few times? Let’s look at what we actually know.",
           },
           {
-            label: "One tiny step for the next hour",
+            label: "One tiny step, next hour",
             go: "recharge",
             say: "Just the next hour. What would help right now?",
           },
@@ -374,7 +374,7 @@ export const COPY = {
         q: "Noticing it is enough. Thoughts are weather too.",
         opts: [
           {
-            label: "Just sit with it a sec",
+            label: "Just sit with it",
             say: "Okay. I’ll sit here with you. No fixing needed.",
           },
         ],

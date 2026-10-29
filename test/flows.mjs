@@ -55,7 +55,7 @@ const CARDS = {
   food: ['We’re munching side by side. Best picnic ever.', 'Big slurp! My leaves just perked right up.'],
   rest: ['I’m curling up next to you. We recharge together.', 'Shh… nap time. The garden grows while we sleep.'],
   pit: ['Good call. I’ll hold down the fort.', 'No rush. The garden will be right here.'],
-  friend: ['I love hearing your friend’s voice. You sound lighter.', 'My roots feel steadier already. We don’t have to carry it all alone.'],
+  friend: ['I love hearing your friend’s voice. My leaves are swaying along.', 'My roots feel steadier already. We don’t have to carry it all alone.'],
   art: ['Ooh, can I add a leaf to it?', 'Making just for fun. No grades around here.'],
   move: ['Wiggle wiggle! My roots feel looser.', 'Fresh air! I’m rolling around in the grass.'],
 };
@@ -66,23 +66,23 @@ const THOUGHTS = [
   ['A should statement', 'Whose rule is that one, anyway?', [
     ['Swap “should” for “could”', '‘I could…’ Feels lighter, right? Could means it’s a choice, not a debt.'],
     ['Save it for Future moves', 'It doesn’t have to be today. Teach it to me later, or tuck it into Future moves.']]],
-  ['Running on empty', 'Pushing through works for one battle, not every day.', [
+  ['Running on empty', 'Has pushing through been working lately?', [
     ['Recharge first', 'Let’s top up first. Pick anything here and I’ll do it with you.'],
     ['Lighten today’s moves', 'Which move could wait? Saving one for later isn’t quitting.']]],
   ['People-pleasing', 'Every yes to them is a no to something else, sometimes to you.', [
     ['Borrow a soft no', 'Want a line? ‘I’d love to, but I can’t take that on right now.’ Kind, short, done.'],
     ['Buy some time', 'Here’s one: ‘Let me check and get back to you.’ No answer needed on the spot.']]],
   ['Mind reading', 'Has anyone actually said that?', [
-    ['What would I tell a friend?', 'You’d tell them rest isn’t lazy. I’m telling you the same.'],
+    ['What I’d tell a friend', 'You’d tell them rest isn’t lazy. I’m telling you the same.'],
     ['Check the evidence', 'If no one said it, it’s a guess, not a fact. Guesses can be wrong.']]],
   ['All-or-nothing', 'Is there a good-enough middle?', [
     ['Find the good-enough version', 'What would mostly done look like? Good enough is still good.'],
-    ['Name one part that went okay', 'There’s always one. Even ‘I showed up’ counts.']]],
+    ['Name one okay part', 'There’s always one. Even ‘I showed up’ counts.']]],
   ['Fortune telling', 'What’s most likely, not worst?', [
-    ['Picture the most likely version', 'Most days land somewhere in the middle. This one probably will too.'],
-    ['One tiny step for the next hour', 'Just the next hour. What would help right now?']]],
+    ['Picture the most likely version', 'What happened the last few times? Let’s look at what we actually know.'],
+    ['One tiny step, next hour', 'Just the next hour. What would help right now?']]],
   ['That’s fine', 'Noticing it is enough. Thoughts are weather too.', [
-    ['Just sit with it a sec', 'Okay. I’ll sit here with you. No fixing needed.']]],
+    ['Just sit with it', 'Okay. I’ll sit here with you. No fixing needed.']]],
 ];
 const caption = (page) => page.$eval('.today-garden p', (n) => n.textContent);
 const bondIdx = (page) => page.evaluate(() => window.__snoozle.COPY.bond.indexOf(document.querySelector('.bond').textContent.trim()));
@@ -392,12 +392,12 @@ export const flows = [
       assert((await sel(page, '.daycare li')).join() === 'Nothing saved yet. That’s a nice, light feeling.', 'empty future');
       await teach(page, 'Stretch'); await teach(page, 'Email');
       await tap(page, '.move:nth-child(1) button[data-act=use]');
-      assert(['Nice! That one’s done. My leaves did a little wiggle.', 'Move used! Take a breath before the next one.'].includes(await dialog(page)), 'used line');
+      assert(['Nice! That one’s done. My leaves did a little wiggle.', 'Move used! Nice and steady.'].includes(await dialog(page)), 'used line');
       assert(await page.$eval('.move.used .mtext', (n) => getComputedStyle(n).textDecorationLine.includes('line-through')), 'crossed out');
       assert((await page.$$('.move.used button')).length === 0, 'buttons gone');
       assert(await page.evaluate(() => document.getElementById('buddy-react').getAnimations().length > 0), 'no sit-down breather');
       await tap(page, '.move:nth-child(2) button[data-act=save]');
-      assert((await dialog(page)) === 'Email is saved in Future moves. It’ll wait.', 'save line');
+      assert((await dialog(page)) === 'Email is waiting in Future moves. Ahh, lighter already.', 'save line');
       assert((await page.$eval('.fl.word', (n) => n.textContent).catch(() => '')) === 'phew~', 'no phew~');
       await page.reload({ waitUntil: 'load' }); await page.waitForSelector('#typed');
       await goto(page, 'moves');
