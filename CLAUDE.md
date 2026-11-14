@@ -1,7 +1,7 @@
 # Snoozle's Garden — agent brief
 
 A mobile-first web page where Snoozle, a small original creature, helps people who are burnt out or over-commit
-check in, recharge and plan lighter days. One static `index.html`, no backend, on Cloudflare Pages (private repo).
+check in, recharge and plan lighter days. One static `index.html`, no backend, on Cloudflare Pages (public repo).
 Plan: [ARCHITECTURE.md](ARCHITECTURE.md). Status and decisions: [PLAN.md](PLAN.md). Run locally: [README.md](README.md).
 
 ## Start here

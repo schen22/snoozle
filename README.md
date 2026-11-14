@@ -27,3 +27,18 @@ Needs Node ≥ 20.6 and an installed Google Chrome. Run `npm install` once.
 - [PLAN.md](PLAN.md): status and decisions.
 - [ARCHITECTURE.md](ARCHITECTURE.md): how it's built.
 - [CLAUDE.md](CLAUDE.md): agent brief and constraints.
+
+## Built with Claude Code
+
+Built in two days with [Claude Code](https://claude.com/claude-code): 70 of 71 commits are
+co-authored by Claude. I set the goals, the constraints and the copy and reviewed every change;
+Claude planned, built and tested inside them.
+
+- [CLAUDE.md](CLAUDE.md) is the brief Claude works from: constraints, gates, lessons.
+- [PLAN.md](PLAN.md) has every decision, dated.
+- `npm run gate` runs before every commit.
+- The workflow (skills, hooks, review gates) is in [claude-config](https://github.com/schen22/claude-config).
+
+## License
+
+[MIT](LICENSE).
