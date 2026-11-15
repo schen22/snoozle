@@ -10,9 +10,10 @@ Try it on your phone: [snoozle.pages.dev](https://snoozle.pages.dev)
 ## What you can do
 
 - **Garden:** pick today's sky, from sunny to stormy, as a quick mood check-in. Every kind of weather grows the garden.
-- **Recharge:** six small acts of care (eat, rest, a bathroom break, phone a friend, make something, wiggle). Each one counts.
+- **Recharge:** six small acts of care (eat, rest, a bathroom break, phone a friend, make something, wiggle). 
 - **Moves:** today's to-dos, sized to the weather. A stormy day gets fewer moves than your usual, and extras are saved for later.
-- **Thoughts:** name a sticky thought and the thinking trap behind it ("I should…", "It'll all go wrong").
+- **Thoughts:** name a sticky thought and the thinking behind it ("I should…", "It'll all go wrong").
+- **Friendship:** everything you do with Snoozle to recharge increases the friendship level with Snoozle.
 
 ## Product decisions
 
